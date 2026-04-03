@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "VRHand.generated.h"
 
+class IInteractable;
 struct FInputActionValue;
 class UVRHandAnimInstance;
 class UInputAction;
@@ -36,6 +37,9 @@ protected:
 	void StopHandPoint();
 	void StopHandThumbUp();
 	
+	void GrabObject();
+	void ReleaseObject();
+	
 // Component Section	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
@@ -64,6 +68,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|입력")
 	TObjectPtr<UInputAction> HandThumbUpAction;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|입력")
+	TObjectPtr<UInputAction> GrabAction;
 
 
 // Variable Section	
@@ -79,5 +86,7 @@ protected:
 private:
 	UPROPERTY()
 	TObjectPtr<UVRHandAnimInstance> AnimInstance;
+	
+	TScriptInterface<IInteractable> CurrentlyGrabbedActor;
 	
 };

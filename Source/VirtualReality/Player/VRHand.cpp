@@ -6,6 +6,8 @@
 #include "Animation/VRHandAnimInstance.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetInteractionComponent.h"
+#include "Define/Define.h"
+#include "Interface/Interactable.h"
 
 
 AVRHand::AVRHand()
@@ -25,6 +27,10 @@ AVRHand::AVRHand()
 	// GrabCollision 초기화
 	GrabCollision = CreateDefaultSubobject<USphereComponent>(TEXT("GrabCollision"));
 	GrabCollision->SetupAttachment(HandMesh);
+	GrabCollision->SetSphereRadius(15.0f);
+	GrabCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GrabCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+	GrabCollision->SetCollisionResponseToChannel(ECC_GRABBABLE, ECR_Overlap);
 }
 
 void AVRHand::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -57,6 +63,13 @@ void AVRHand::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 			EIC->BindAction(HandThumbUpAction, ETriggerEvent::Started, this, &AVRHand::DoHandThumbUp);
 			EIC->BindAction(HandThumbUpAction, ETriggerEvent::Canceled, this, &AVRHand::DoHandThumbUp);
 			EIC->BindAction(HandThumbUpAction, ETriggerEvent::Completed, this, &AVRHand::StopHandThumbUp);
+		}
+		
+		if (GrabAction)
+		{
+			EIC->BindAction(GrabAction, ETriggerEvent::Started, this, &AVRHand::GrabObject);
+			EIC->BindAction(GrabAction, ETriggerEvent::Canceled, this, &AVRHand::ReleaseObject);
+			EIC->BindAction(GrabAction, ETriggerEvent::Completed, this, &AVRHand::ReleaseObject);
 		}
 	}
 }
@@ -92,31 +105,53 @@ void AVRHand::BeginPlay()
 	AnimInstance->bIsMirror = bMirrorAnimation;
 }
 
+void AVRHand::GrabObject()
+{
+	TArray<AActor*> OverlappedActors;
+	GrabCollision->GetOverlappingActors(OverlappedActors);
+	if (OverlappedActors.IsEmpty()) return;
+	
+	AActor* FirstActorUnderCollision = OverlappedActors[0];
+	if (!FirstActorUnderCollision) return;
+	
+	CurrentlyGrabbedActor = TScriptInterface<IInteractable>(FirstActorUnderCollision);
+	if (CurrentlyGrabbedActor)
+	{
+		CurrentlyGrabbedActor->OnGrab(HandMesh, GrabCollision->GetComponentLocation());
+	}
+}
+
+void AVRHand::ReleaseObject()
+{
+	if (CurrentlyGrabbedActor)
+	{
+		CurrentlyGrabbedActor->OnRelease(HandMesh);
+		CurrentlyGrabbedActor = nullptr;
+	}
+}
+
+
 void AVRHand::DoHandGrasp(const FInputActionValue& InValue)
 {
 	const float ActionValue = InValue.Get<float>();
 	
-	LOG(TEXT("발동"))
 	AnimInstance->PoseAlphaGrasp = ActionValue;
 }
 
 void AVRHand::DoHandIndexCurl(const FInputActionValue& InValue)
 {
 	const float ActionValue = InValue.Get<float>();
-	LOG(TEXT("발동"))
 
 	AnimInstance->PoseAlphaIndexCurl = ActionValue;
 }
 
 void AVRHand::DoHandPoint()
-{	LOG(TEXT("발동"))
-
+{	
 	AnimInstance->PoseAlphaPoint = 0.0f;
 }
 
 void AVRHand::DoHandThumbUp()
-{	LOG(TEXT("발동"))
-
+{	
 	AnimInstance->PoseAlphaThumbUp = 0.0f;
 }
 
