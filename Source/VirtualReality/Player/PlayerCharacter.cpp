@@ -36,14 +36,19 @@ APlayerCharacter::APlayerCharacter()
 	LeftController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("LeftController"));
 	LeftController->SetupAttachment(VROrigin);
 	LeftController->SetTrackingMotionSource(FName("Left"));
+	
+	// 왼쪽 손 메쉬
+	LeftHandMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("LeftHandMesh"));
+	LeftHandMesh->SetupAttachment(LeftController);
 
 	// 오른손 컨트롤러 (VRRoot에 부착)
 	RightController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("RightController"));
 	RightController->SetupAttachment(VROrigin);
 	RightController->SetTrackingMotionSource(FName("Right"));
 	
-	// 캐릭터 SkeletalMesh (VRCamera에 부착)
-	GetMesh()->SetupAttachment(VRCamera);
+	// 오른쪽 손 메쉬 
+	RightHandMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RightHandMesh"));
+	RightHandMesh->SetupAttachment(RightController);
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -83,12 +88,6 @@ void APlayerCharacter::NotifyControllerChanged()
 			}
 		}
 	}
-}
-
-void APlayerCharacter::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-	
 }
 
 void APlayerCharacter::InitVRSetting()

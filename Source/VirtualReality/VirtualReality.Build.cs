@@ -16,7 +16,8 @@ public class VirtualReality : ModuleRules
 			"InputCore", 
 			"EnhancedInput",
 			"HeadMountedDisplay",
-			"XRBase"
+			"XRBase",
+			"UMG"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
