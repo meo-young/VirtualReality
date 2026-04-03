@@ -27,7 +27,7 @@ AMonitor::AMonitor()
 	ScreenLight = CreateDefaultSubobject<URectLightComponent>(TEXT("ScreenLight"));
 	ScreenLight->SetupAttachment(ScreenMesh);
 	ScreenLight->SetIntensityUnits(ELightUnits::Unitless);
-	ScreenLight->Intensity = 50.0f;
+	ScreenLight->Intensity = 30.0f;
 	ScreenLight->SetSourceWidth(100.0f);
 	ScreenLight->SetSourceHeight(20.0f);
 	ScreenLight->SetVisibility(false);

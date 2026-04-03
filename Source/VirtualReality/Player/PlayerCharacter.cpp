@@ -1,16 +1,25 @@
 #include "PlayerCharacter.h"
-
 #include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "InputActionValue.h"
 #include "MotionControllerComponent.h"
 #include "VirtualReality.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "InputMappingContext.h"
 
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC_Player(TEXT("/Game/_VirtualReality/Input/IMC_Player"));
+	{
+		if (IMC_Player.Succeeded())
+		{
+			DefaultInputMappingContext = IMC_Player.Object;
+		}
+	}
 
 	// 액터가 컨트롤러 Yaw를 따라 회전하도록 활성화합니다.
 	bUseControllerRotationYaw = true;
@@ -41,18 +50,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
-	UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	if (!EIC)
+	if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		LOG(TEXT("EnhancedInputComponent를 찾을 수 없습니다."));
-		return;
+		//@TODO : PC 버전과 VR 버전에서 입력 액션을 분리하는 것을 고려해 볼 수 있습니다.
 	}
-
-	// 이동 액션 바인딩 (Triggered: 매 프레임 입력 유지 중 호출)
-	EIC->BindAction(IA_Move, ETriggerEvent::Triggered, this, &APlayerCharacter::DoMove);
-
-	// 회전 액션 바인딩
-	EIC->BindAction(IA_Turn, ETriggerEvent::Triggered, this, &APlayerCharacter::DoTurn);
 }
 
 void APlayerCharacter::BeginPlay()
@@ -60,19 +61,34 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	InitVRSetting();
+}
+
+void APlayerCharacter::NotifyControllerChanged()
+{
+	Super::NotifyControllerChanged();
 	
-	// 현재 컨트롤러 Yaw로 보간 초기값을 설정합니다.
-	TargetYaw   = GetControlRotation().Yaw;
-	SmoothedYaw = TargetYaw;
+	if (!DefaultInputMappingContext)
+	{
+		LOG(TEXT("DefaultInputMappingContext가 설정되지 않았습니다. 블루프린트에서 할당해 주세요."));
+		return;
+	}
+	
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))	
+	{
+		if (ULocalPlayer* LP = PlayerController->GetLocalPlayer())
+		{
+			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+			{
+				Subsystem->AddMappingContext(DefaultInputMappingContext, 0);
+			}
+		}
+	}
 }
 
 void APlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	
-	LerpOffsetToHMD();
-	ScaleCapsuleToHMD();
-	LerpControlRotation(DeltaSeconds);
 }
 
 void APlayerCharacter::InitVRSetting()
@@ -87,57 +103,4 @@ void APlayerCharacter::InitVRSetting()
 	{
 		LOG(TEXT("HMD가 감지되지 않았습니다. 일반 카메라 모드로 실행됩니다."));
 	}
-}
-
-void APlayerCharacter::LerpOffsetToHMD()
-{
-	FVector CameraLocation = VRCamera->GetComponentLocation();
-	FVector CapsuleLocation = GetCapsuleComponent()->GetComponentLocation();
-
-	CameraLocation.Z = 0.0f;
-	CapsuleLocation.Z = 0.0f;
-
-	GetCapsuleComponent()->AddWorldOffset(CameraLocation - CapsuleLocation, false);
-	VROrigin->AddWorldOffset(CapsuleLocation - CameraLocation);
-}
-
-void APlayerCharacter::ScaleCapsuleToHMD()
-{
-	FVector CameraLocation = VRCamera->GetRelativeLocation();
-	FVector VRLocation = VROrigin->GetRelativeLocation();
-	VRLocation.Z = -CameraLocation.Z/2 - 2.15f;
-
-	VROrigin->SetRelativeLocation(VRLocation);
-	GetCapsuleComponent()->SetCapsuleHalfHeight(CameraLocation.Z/2, true);
-}
-
-void APlayerCharacter::LerpControlRotation(const float InDeltaTime)
-{
-	// SmoothedYaw를 TargetYaw 방향으로 부드럽게 보간하여 컨트롤러에 적용합니다.
-	// bUseControllerRotationYaw = true 이므로 액터가 자동으로 따라옵니다.
-	SmoothedYaw = FMath::FInterpTo(SmoothedYaw, TargetYaw, InDeltaTime, TurnLagSpeed);
-	AController* C = GetController();
-	if (C)
-	{
-		C->SetControlRotation(FRotator(0.f, SmoothedYaw, 0.f));
-	}
-}
-
-void APlayerCharacter::DoMove(const FInputActionValue& InValue)
-{
-	const FVector2D MoveInput = InValue.Get<FVector2D>();
-	if (MoveInput.IsNearlyZero()) return;
-	
-	// 몸체(액터)의 전방/우방 벡터 기준으로 이동 방향을 계산합니다.
-	AddMovementInput(GetActorForwardVector(), MoveInput.Y);
-	AddMovementInput(GetActorRightVector(),   MoveInput.X);
-}
-
-void APlayerCharacter::DoTurn(const FInputActionValue& InValue)
-{
-	const float TurnInput = InValue.Get<float>();
-	if (FMath::IsNearlyZero(TurnInput)) return;
-
-	// 목표 Yaw에 입력값을 누적합니다. 실제 회전은 Tick에서 보간하여 적용합니다.
-	TargetYaw += TurnInput * TurnSpeed * GetWorld()->GetDeltaSeconds();
 }
