@@ -1,6 +1,7 @@
 #include "VRPlayer.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "VirtualReality.h"
 #include "VRHand.h"
