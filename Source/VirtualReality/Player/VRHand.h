@@ -26,19 +26,29 @@ public:
 public:
 	void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent);
 	
-protected:
-	void DoHandGrasp(const FInputActionValue& InValue);
-	void DoHandIndexCurl(const FInputActionValue& InValue);
-	void DoHandPoint();
-	void DoHandThumbUp();
 	
+// Action Binding Function Section	
+protected:
+	// HandGraspAction Binding Function
+	void DoHandGrasp(const FInputActionValue& InValue);
 	void StopHandGrasp();
+	
+	// HandIndexCurl Binding Function
+	void DoHandIndexCurl(const FInputActionValue& InValue);
 	void StopHandIndexCurl();
+	
+	// HandPoint Binding Function
+	void DoHandPoint();
 	void StopHandPoint();
+	
+	// HandThumbUp Binding Function
+	void DoHandThumbUp();
 	void StopHandThumbUp();
 	
+	// GrabAction Binding Function
 	void GrabObject();
 	void ReleaseObject();
+	
 	
 // Component Section	
 protected:

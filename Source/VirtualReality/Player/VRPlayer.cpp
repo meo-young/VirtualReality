@@ -1,6 +1,6 @@
 #include "VRPlayer.h"
-
 #include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "VirtualReality.h"
 #include "VRHand.h"
@@ -9,6 +9,18 @@
 
 AVRPlayer::AVRPlayer()
 {
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC_Default(TEXT("/Game/VRTemplate/Input/IMC_Default"));
+	if (IMC_Default.Succeeded())
+	{
+		DefaultMappingContext = IMC_Default.Object;
+	}
+	
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC_Hands(TEXT("/Game/VRTemplate/Input/IMC_Hands"));
+	if (IMC_Hands.Succeeded())
+	{
+		HandsMappingContext = IMC_Hands.Object;
+	}
+	
 	static ConstructorHelpers::FClassFinder<AVRHand> BP_LeftHand(TEXT("/Game/_VirtualReality/Blueprint/Player/BP_LeftHand"));
 	if (BP_LeftHand.Succeeded())
 	{
@@ -26,6 +38,23 @@ AVRPlayer::AVRPlayer()
 	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(VROrigin);
+}
+
+void AVRPlayer::NotifyControllerChanged()
+{
+	Super::NotifyControllerChanged();
+	
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())
+		{
+			if (UEnhancedInputLocalPlayerSubsystem* EnhancedInput = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+			{
+				EnhancedInput->AddMappingContext(DefaultMappingContext, 0);
+				EnhancedInput->AddMappingContext(HandsMappingContext, 0);
+			}
+		}
+	}
 }
 
 void AVRPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
