@@ -17,7 +17,10 @@ public class VirtualReality : ModuleRules
 			"EnhancedInput",
 			"HeadMountedDisplay",
 			"XRBase",
-			"UMG"
+			"UMG",
+			"ActorSequence",
+			"LevelSequence",
+			"MovieScene"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

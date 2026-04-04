@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Actor/VRActorBase.h"
-#include "Interface/Interactable.h"
+#include "Interface/Grabbable.h"
 #include "VRGrabbableActor.generated.h"
 
 class UBoxComponent;
@@ -16,7 +16,7 @@ enum class EGrabType : uint8
 };
 
 UCLASS()
-class VIRTUALREALITY_API AVRGrabbableActor : public AVRActorBase, public IInteractable
+class VIRTUALREALITY_API AVRGrabbableActor : public AVRActorBase, public IGrabbable
 {
 	GENERATED_BODY()
 	

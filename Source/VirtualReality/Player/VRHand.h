@@ -4,7 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "VRHand.generated.h"
 
-class IInteractable;
+class IGrabbable;
 struct FInputActionValue;
 class UVRHandAnimInstance;
 class UInputAction;
@@ -22,6 +22,7 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	
 public:
 	void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent);
@@ -97,6 +98,12 @@ private:
 	UPROPERTY()
 	TObjectPtr<UVRHandAnimInstance> AnimInstance;
 	
-	TScriptInterface<IInteractable> CurrentlyGrabbedActor;
+	TScriptInterface<IGrabbable> CurrentlyGrabbedActor;
+	
+	FVector LastLocation;
+	FVector CurrentCalculatedVelocity;
+	
+public:
+	FORCEINLINE FVector GetHandVelocity() const { return CurrentCalculatedVelocity; }
 	
 };

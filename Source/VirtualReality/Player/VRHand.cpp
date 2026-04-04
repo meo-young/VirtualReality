@@ -7,11 +7,13 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetInteractionComponent.h"
 #include "Define/Define.h"
-#include "Interface/Interactable.h"
+#include "Interface/Grabbable.h"
 
 
 AVRHand::AVRHand()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	
 	// MotionController 초기화
 	MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("MotionController"));
 	SetRootComponent(MotionController);
@@ -105,6 +107,17 @@ void AVRHand::BeginPlay()
 	AnimInstance->bIsMirror = bMirrorAnimation;
 }
 
+void AVRHand::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	
+	FVector CurrentLocation = MotionController->GetComponentLocation();
+	CurrentCalculatedVelocity = (CurrentLocation - LastLocation) / DeltaSeconds;
+	LastLocation = CurrentLocation;
+	
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, FString::Printf(TEXT("Hand Speed: %.2f"), CurrentCalculatedVelocity.Size()));
+}
+
 void AVRHand::GrabObject()
 {
 	TArray<AActor*> OverlappedActors;
@@ -114,7 +127,7 @@ void AVRHand::GrabObject()
 	AActor* FirstActorUnderCollision = OverlappedActors[0];
 	if (!FirstActorUnderCollision) return;
 	
-	CurrentlyGrabbedActor = TScriptInterface<IInteractable>(FirstActorUnderCollision);
+	CurrentlyGrabbedActor = TScriptInterface<IGrabbable>(FirstActorUnderCollision);
 	if (CurrentlyGrabbedActor)
 	{
 		CurrentlyGrabbedActor->OnGrab(HandMesh, GrabCollision->GetComponentLocation());
