@@ -8,19 +8,37 @@
 #include "Components/WidgetInteractionComponent.h"
 #include "Define/Define.h"
 #include "Interface/Grabbable.h"
+#include "PhysicsEngine/PhysicsConstraintComponent.h"
 
 
 AVRHand::AVRHand()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
+	// SceneComponent 초기화
+	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	SetRootComponent(Root);
+	
 	// MotionController 초기화
 	MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("MotionController"));
-	SetRootComponent(MotionController);
+	MotionController->SetupAttachment(Root);
+	
+	// 가상 HandMesh 초기화
+	VirtualHandMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("VirtualHandMesh"));
+	VirtualHandMesh->SetupAttachment(MotionController);
+	VirtualHandMesh->SetGenerateOverlapEvents(false);
+	VirtualHandMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	VirtualHandMesh->SetClothMaxDistanceScale(ECR_Overlap);
+	
+	// PhysicsConstraint 초기화
+	PhysicsConstraint = CreateDefaultSubobject<UPhysicsConstraintComponent>(TEXT("PhysicsConstraint"));
+	PhysicsConstraint->SetupAttachment(MotionController);
 	
 	// HandMesh 초기화
 	HandMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandMesh"));
-	HandMesh->SetupAttachment(MotionController);
+	HandMesh->SetupAttachment(Root);
+	HandMesh->SetSimulatePhysics(true);
+	HandMesh->SetCollisionProfileName(FName("PhysicsActor"));
 	
 	// WidgetInteractionComponent 초기화
 	WidgetInteractionComponent = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WidgetInteractionComponent"));
@@ -84,9 +102,11 @@ void AVRHand::OnConstruction(const FTransform& Transform)
 	{
 		case EControllerHand::Left:
 			MotionController->MotionSource = FName("Left");
+			BoneName = FName("hand_l");
 			break;
 		case EControllerHand::Right:	
 			MotionController->MotionSource = FName("Right");
+			BoneName = FName("hand_r");
 			break;
 		default:
 			break;
@@ -105,6 +125,8 @@ void AVRHand::BeginPlay()
 	Super::BeginPlay();
 	
 	AnimInstance->bIsMirror = bMirrorAnimation;
+	
+	UpdateHandPhysicsBelow(BoneName, true, 0.15f);
 }
 
 void AVRHand::Tick(float DeltaSeconds)
@@ -140,6 +162,15 @@ void AVRHand::ReleaseObject()
 	{
 		CurrentlyGrabbedActor->OnRelease(HandMesh);
 		CurrentlyGrabbedActor = nullptr;
+	}
+}
+
+void AVRHand::UpdateHandPhysicsBelow(FName InBoneName, bool bNewSimulate, float InBlendWeight)
+{
+	if (HandMesh)
+	{
+		HandMesh->SetAllBodiesBelowSimulatePhysics(InBoneName, bNewSimulate, true);
+		HandMesh->SetAllBodiesBelowPhysicsBlendWeight(InBoneName, InBlendWeight, false, true);
 	}
 }
 
