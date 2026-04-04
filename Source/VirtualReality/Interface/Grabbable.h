@@ -2,16 +2,16 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "Interactable.generated.h"
+#include "Grabbable.generated.h"
 
 UINTERFACE()
-class UInteractable : public UInterface
+class UGrabbable : public UInterface
 {
 	GENERATED_BODY()
 };
 
 
-class VIRTUALREALITY_API IInteractable
+class VIRTUALREALITY_API IGrabbable
 {
 	GENERATED_BODY()
 
