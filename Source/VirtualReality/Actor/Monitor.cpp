@@ -7,7 +7,7 @@
 #include "Manager/CCTVManager.h"
 #include "Actor/CCTV.h"
 #include "VirtualReality.h"
-#include "Components/RectLightComponent.h"
+#include "Components/PointLightComponent.h"
 
 AMonitor::AMonitor()
 {
@@ -24,14 +24,10 @@ AMonitor::AMonitor()
 	ScreenMesh->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	ScreenMesh->SetRelativeScale3D(FVector(0.6f, 0.001f, 0.14f));
 	
-	ScreenLight = CreateDefaultSubobject<URectLightComponent>(TEXT("ScreenLight"));
+	ScreenLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("ScreenLight"));
 	ScreenLight->SetupAttachment(ScreenMesh);
 	ScreenLight->SetIntensityUnits(ELightUnits::Unitless);
-	ScreenLight->Intensity = 30.0f;
-	ScreenLight->SetSourceWidth(100.0f);
-	ScreenLight->SetSourceHeight(20.0f);
 	ScreenLight->SetVisibility(false);
-	ScreenLight->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
 	
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_Monitor(TEXT("/Game/AtmosphericHouse/Meshes/Meshes_props/Electronics/SM_Computer_screen"));
 	if (SM_Monitor.Succeeded())
@@ -49,24 +45,6 @@ void AMonitor::BeginPlay()
 	{
 		ScreenMaterialInstance = UMaterialInstanceDynamic::Create(ScreenMaterial, this);
 		ScreenMesh->SetMaterial(0, ScreenMaterialInstance);
-	}
-
-	// 이 액터가 플레이어 입력을 받을 수 있도록 활성화합니다.
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	EnableInput(PC);
-
-	// Enhanced Input 컴포넌트에 CCTV 전환 액션을 바인딩합니다.
-	if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent))
-	{
-		if (IA_NextCCTV)
-		{
-			EIC->BindAction(IA_NextCCTV, ETriggerEvent::Started, this, &AMonitor::OnNextCCTV);
-		}
-
-		if (IA_PrevCCTV)
-		{
-			EIC->BindAction(IA_PrevCCTV, ETriggerEvent::Started, this, &AMonitor::OnPrevCCTV);
-		}
 	}
 }
 

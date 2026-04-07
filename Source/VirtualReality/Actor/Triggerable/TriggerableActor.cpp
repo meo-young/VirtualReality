@@ -24,11 +24,13 @@ void ATriggerableActor::OnTriggered()
 void ATriggerableActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
                                        UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (!bIsTriggerEnabled) return;
+	
 	if (!OtherActor || OtherActor == this) return;
 	
 	if (AVRHand* Hand = Cast<AVRHand>(OtherActor))
 	{
-		if (FMath::Abs(Hand->GetHandVelocity().Z) >= 300.0f)
+		if (FMath::Abs(Hand->GetHandVelocity().Z) >= TriggerSpeedThreshold)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Overlap with: %s"), *OtherActor->GetName()));
 			OnTriggered();

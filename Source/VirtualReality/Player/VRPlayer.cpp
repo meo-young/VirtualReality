@@ -86,7 +86,7 @@ void AVRPlayer::InitVRSetting()
 	if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled())
 	{
 		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::LocalFloor);
-		LOG(TEXT("HMD 감지 — 트래킹 원점을 Floor로 설정했습니다."));
+		LOG(TEXT("HMD 감지 — 트래킹 원점을 LocalFloor 설정했습니다."));
 	}
 	else
 	{

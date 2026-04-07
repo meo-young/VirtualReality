@@ -5,6 +5,8 @@ ARedButton::ARedButton()
 	// 버튼 메시 컴포넌트를 생성하고 루트에 부착합니다.
 	ButtonMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Button"));
 	ButtonMesh->SetupAttachment(Mesh);
+	
+	TriggerSpeedThreshold = 300.0f;
 }
 
 void ARedButton::OnSequenceStarted()
