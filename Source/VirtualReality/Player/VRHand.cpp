@@ -47,7 +47,7 @@ AVRHand::AVRHand()
 	// GrabCollision 초기화
 	GrabCollision = CreateDefaultSubobject<USphereComponent>(TEXT("GrabCollision"));
 	GrabCollision->SetupAttachment(HandMesh);
-	GrabCollision->SetSphereRadius(15.0f);
+	GrabCollision->SetSphereRadius(10.0f);
 	GrabCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	GrabCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
 	GrabCollision->SetCollisionResponseToChannel(ECC_GRABBABLE, ECR_Overlap);
@@ -152,16 +152,21 @@ void AVRHand::GrabObject()
 	CurrentlyGrabbedActor = TScriptInterface<IGrabbable>(FirstActorUnderCollision);
 	if (CurrentlyGrabbedActor)
 	{
+		bIsGrabbing = true;
+		CurrentGrabbableType = CurrentlyGrabbedActor->GetGrabbableType();
 		CurrentlyGrabbedActor->OnGrab(HandMesh, GrabCollision->GetComponentLocation());
 	}
 }
 
 void AVRHand::ReleaseObject()
 {
+	bIsGrabbing = false;
+	
 	if (CurrentlyGrabbedActor)
 	{
 		CurrentlyGrabbedActor->OnRelease(HandMesh);
 		CurrentlyGrabbedActor = nullptr;
+		UpdateHandPhysicsBelow(BoneName, true, 0.15f);
 	}
 }
 

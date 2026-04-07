@@ -4,6 +4,13 @@
 #include "UObject/Interface.h"
 #include "Grabbable.generated.h"
 
+UENUM(BlueprintType)
+enum class EGrabbableType : uint8
+{
+	Free,
+	Lever
+};
+
 UINTERFACE()
 class UGrabbable : public UInterface
 {
@@ -18,5 +25,6 @@ class VIRTUALREALITY_API IGrabbable
 public:
 	virtual void OnGrab(USkeletalMeshComponent* InComponent, const FVector& GrabLocation) = 0;
 	virtual void OnRelease(USkeletalMeshComponent* InComponent) = 0;
+	virtual EGrabbableType GetGrabbableType() const = 0;
 
 };

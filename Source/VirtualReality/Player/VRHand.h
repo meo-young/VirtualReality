@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "VRHand.generated.h"
 
+enum class EGrabbableType : uint8;
 class UPhysicsConstraintComponent;
 class IGrabbable;
 struct FInputActionValue;
@@ -109,6 +110,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|손")
 	FName BoneName;
 	
+private:
+	uint8 bIsGrabbing : 1 = false;
+	EGrabbableType CurrentGrabbableType;
 	
 	
 // Cached Section	
@@ -123,5 +127,7 @@ private:
 	
 public:
 	FORCEINLINE FVector GetHandVelocity() const { return CurrentCalculatedVelocity; }
+	FORCEINLINE uint8 GetIsGrabbing() const { return bIsGrabbing; }
+	FORCEINLINE EGrabbableType GetCurrentGrabbableType() const { return CurrentGrabbableType; }
 	
 };

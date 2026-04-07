@@ -1,4 +1,13 @@
 #include "VRHandAnimInstance.h"
+#include "VirtualReality.h"
+#include "Player/VRHand.h"
+
+void UVRHandAnimInstance::NativeInitializeAnimation()
+{
+	Super::NativeInitializeAnimation();
+	
+	CachedHand = Cast<AVRHand>(GetOwningActor());
+}
 
 void UVRHandAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -17,4 +26,9 @@ void UVRHandAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		DeltaSeconds, 
 		InterpSpeed
 	);
+	
+	if (!CachedHand) return;
+	
+	bIsGrabbing = CachedHand->GetIsGrabbing();
+	CurrentGrabbableType = CachedHand->GetCurrentGrabbableType();
 }

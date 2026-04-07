@@ -7,14 +7,6 @@
 
 class UBoxComponent;
 
-UENUM(BlueprintType)
-enum class EGrabType : uint8
-{
-	Free,
-	Snap,
-	None
-};
-
 UCLASS()
 class VIRTUALREALITY_API AVRGrabbableActor : public AVRActorBase, public IGrabbable
 {
@@ -31,14 +23,16 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
 	TObjectPtr<UBoxComponent> GrabRegion;
 	
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|타입")
-	EGrabType GrabType;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|타입")
+	EGrabbableType GrabbableType = EGrabbableType::Free;
 	
 protected:
-	uint8 bIsHeld : 1;
-	
 	UPROPERTY()
 	USkeletalMeshComponent* GrabbedBySkeletalMesh;
+	
+	uint8 bIsHeld : 1;
+
+public:
+	FORCEINLINE virtual EGrabbableType GetGrabbableType() const override { return GrabbableType; }
 	
 };
