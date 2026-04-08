@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "MotionControllerComponent.h"
 #include "VRHand.generated.h"
 
 enum class EGrabbableType : uint8;
@@ -12,7 +13,7 @@ class UVRHandAnimInstance;
 class UInputAction;
 class USphereComponent;
 class UWidgetInteractionComponent;
-class UMotionControllerComponent;
+class UVRHapticComponent;
 
 UCLASS()
 class VIRTUALREALITY_API AVRHand : public AActor
@@ -79,6 +80,9 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
 	TObjectPtr<USphereComponent> GrabCollision;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
+	TObjectPtr<UVRHapticComponent> HapticComponent;
 	
 	
 // Input Section
@@ -129,5 +133,7 @@ public:
 	FORCEINLINE FVector GetHandVelocity() const { return CurrentCalculatedVelocity; }
 	FORCEINLINE uint8 GetIsGrabbing() const { return bIsGrabbing; }
 	FORCEINLINE EGrabbableType GetCurrentGrabbableType() const { return CurrentGrabbableType; }
+	FORCEINLINE FVector GetMotionControllerLocation() const { return MotionController->GetComponentLocation(); }
+	FORCEINLINE UVRHapticComponent* GetHapticComponent() const { return HapticComponent; }
 	
 };

@@ -4,6 +4,7 @@
 #include "MotionControllerComponent.h"
 #include "VirtualReality.h"
 #include "Animation/VRHandAnimInstance.h"
+#include "Component/VRHapticComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetInteractionComponent.h"
 #include "Define/Define.h"
@@ -51,6 +52,9 @@ AVRHand::AVRHand()
 	GrabCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	GrabCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
 	GrabCollision->SetCollisionResponseToChannel(ECC_GRABBABLE, ECR_Overlap);
+
+	// HapticComponent 초기화
+	HapticComponent = CreateDefaultSubobject<UVRHapticComponent>(TEXT("HapticComponent"));
 }
 
 void AVRHand::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -123,10 +127,13 @@ void AVRHand::PostInitializeComponents()
 void AVRHand::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	AnimInstance->bIsMirror = bMirrorAnimation;
-	
+
 	UpdateHandPhysicsBelow(BoneName, true, 0.15f);
+
+	// HapticComponent에 손 타입을 전달합니다.
+	HapticComponent->Initialize(HandType);
 }
 
 void AVRHand::Tick(float DeltaSeconds)

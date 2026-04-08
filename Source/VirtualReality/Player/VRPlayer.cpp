@@ -76,7 +76,7 @@ void AVRPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	InitVRSetting();
+	//InitVRSetting();
 	SpawnVRHands();
 }
 
