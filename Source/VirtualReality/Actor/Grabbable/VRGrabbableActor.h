@@ -6,19 +6,26 @@
 #include "VRGrabbableActor.generated.h"
 
 class UBoxComponent;
+class AVRHand;
 
 UCLASS()
 class VIRTUALREALITY_API AVRGrabbableActor : public AVRActorBase, public IGrabbable
 {
 	GENERATED_BODY()
 	
+
+// Lifecycle Section	
 public:
 	AVRGrabbableActor();
 	
+
+// IGrabbable Interface	
 public:
 	virtual void OnGrab(USkeletalMeshComponent* InComponent, const FVector& GrabLocation) override;
 	virtual void OnRelease(USkeletalMeshComponent* InComponent) override;
 	
+
+// Component Section	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
 	TObjectPtr<UBoxComponent> GrabRegion;
@@ -26,12 +33,28 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|타입")
 	EGrabbableType GrabbableType = EGrabbableType::Free;
 	
-protected:
+	
+// Haptic Feedback Section	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
+	float GrabHapticFrequency = 0.4f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
+	float GrabHapticAmplitude = 0.4f;
+	
+	
+// Cached Section
 	UPROPERTY()
 	USkeletalMeshComponent* GrabbedBySkeletalMesh;
+
+	UPROPERTY()
+	TObjectPtr<AVRHand> CachedHand;
 	
+	
+// State Section	
 	uint8 bIsHeld : 1;
 
+	
+// Getter, Setter Section	
 public:
 	FORCEINLINE virtual EGrabbableType GetGrabbableType() const override { return GrabbableType; }
 	

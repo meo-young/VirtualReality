@@ -1,5 +1,6 @@
 #include "TriggerableActor.h"
 #include "VirtualReality.h"
+#include "Component/VRHapticComponent.h"
 #include "Components/BoxComponent.h"
 #include "Player/VRHand.h"
 
@@ -30,10 +31,7 @@ void ATriggerableActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAct
 	
 	if (AVRHand* Hand = Cast<AVRHand>(OtherActor))
 	{
-		if (FMath::Abs(Hand->GetHandVelocity().Z) >= TriggerSpeedThreshold)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Overlap with: %s"), *OtherActor->GetName()));
-			OnTriggered();
-		}
+		Hand->GetHapticComponent()->PlayHapticBurst(BurstHapticFrequency, BurstHapticAmplitude, BurstHapticDuration);
+		OnTriggered();
 	}
 }

@@ -25,11 +25,9 @@ public:
 // Member Function	
 public:
 	UFUNCTION(BlueprintCallable)
-	void SwitchToCCTV(int32 Index);
-	
-private:
 	void SwitchToNextCCTV();
-	void SwitchToPrevCCTV();
+
+private:
 	void CollectCCTVs();
 	void SetActiveCCTV(int32 Index);
 	void DeactivateAllCCTVs();

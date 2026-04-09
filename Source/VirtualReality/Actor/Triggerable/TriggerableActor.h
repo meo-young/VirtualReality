@@ -4,6 +4,7 @@
 #include "Actor/VRActorBase.h"
 #include "TriggerableActor.generated.h"
 
+class AVRHand;
 class UBoxComponent;
 
 UCLASS()
@@ -27,10 +28,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
 	TObjectPtr<UBoxComponent> TriggerRegion;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|수치")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|수치")
 	float TriggerSpeedThreshold;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|상태")
 	uint8 bIsTriggerEnabled : 1 = true;
+	
+private:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<AVRHand> CachedHand;
 
 };

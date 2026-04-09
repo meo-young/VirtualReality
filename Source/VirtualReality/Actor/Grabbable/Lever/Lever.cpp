@@ -76,7 +76,6 @@ void ALever::OnGrab(USkeletalMeshComponent* InComponent, const FVector& GrabLoca
 	Super::OnGrab(InComponent, GrabLocation);
 
 	// Grab 시점의 컨트롤러 위치와 레버 각도를 캐시합니다.
-	CachedHand = Cast<AVRHand>(InComponent->GetOwner());
 	if (CachedHand)
 	{
 		GrabStartControllerZ = CachedHand->GetMotionControllerLocation().Z;
@@ -95,14 +94,6 @@ void ALever::OnRelease(USkeletalMeshComponent* InComponent)
 	Super::OnRelease(InComponent);
 
 	bIsHeld = false;
-
-	// 햅틱을 즉시 중지합니다.
-	if (CachedHand)
-	{
-		CachedHand->GetHapticComponent()->StopHaptic();
-	}
-
-	CachedHand = nullptr;
 
 	// 손 컴포넌트를 레버에서 분리합니다.
 	InComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
@@ -124,10 +115,6 @@ void ALever::UpdateLeverAngle(float DeltaTime)
 	CurrentAngle = FMath::FInterpTo(CurrentAngle, TargetAngle, DeltaTime, ControlInterpSpeed);
 	LeverMesh->SetRelativeRotation(FRotator(0.0f, 0.f, CurrentAngle));
 
-	// 당기는 정도에 비례하여 연속 햅틱을 재생합니다. (0=MaxAngle, 1=MinAngle)
-	float PullRatio = FMath::Clamp((CurrentAngle - MaxAngle) / (MinAngle - MaxAngle), 0.f, 1.f);
-	CachedHand->GetHapticComponent()->PlayHaptic(PullHapticFrequency, PullRatio * PullHapticMaxAmplitude);
-
 	// MinAngle에 처음 도달했을 때 잠금을 시작하고 강한 햅틱을 재생합니다.
 	if (!bReachedMinAngle && FMath::IsNearlyEqual(CurrentAngle, MinAngle, 10.0f))
 	{
@@ -135,6 +122,6 @@ void ALever::UpdateLeverAngle(float DeltaTime)
 		bIsLocked = true;
 		LockTimer = 0.f;
 		CachedHand->GetHapticComponent()->PlayHapticBurst(
-			MinAngleHapticFrequency, MinAngleHapticAmplitude, MinAngleHapticDuration);
+			BurstHapticFrequency, BurstHapticAmplitude, BurstHapticDuration);
 	}
 }

@@ -91,35 +91,23 @@ void AMonitor::DeactivateAllCCTVs()
 	LOG(TEXT("모든 CCTV가 비활성화되었습니다."));
 }
 
-void AMonitor::SwitchToCCTV(int32 Index)
+void AMonitor::SwitchToNextCCTV()
 {
 	if (RegisteredCCTVs.IsEmpty()) return;
 
 	ScreenLight->SetVisibility(true);
 
-	// 인덱스를 CCTV 배열 범위 내에서 순환시킵니다.
-	const int32 ClampedIndex = (Index % RegisteredCCTVs.Num() + RegisteredCCTVs.Num()) % RegisteredCCTVs.Num();
+	// 다음 인덱스로 순환시킵니다.
+	const int32 NextIndex = (ActiveCCTVIndex + 1) % RegisteredCCTVs.Num();
 
 	// 활성 CCTV를 전환합니다.
-	SetActiveCCTV(ClampedIndex);
+	SetActiveCCTV(NextIndex);
 
 	// 전환된 CCTV의 렌더 타겟을 화면 머티리얼에 적용합니다.
-	if (UTextureRenderTarget2D* RenderTarget = RegisteredCCTVs[ClampedIndex]->GetRenderTarget())
+	if (UTextureRenderTarget2D* RenderTarget = RegisteredCCTVs[NextIndex]->GetRenderTarget())
 	{
 		ScreenMaterialInstance->SetTextureParameterValue(RenderTargetParameterName, RenderTarget);
 	}
 
-	LOG(TEXT("모니터가 CCTV 인덱스 %d로 전환되었습니다."), ClampedIndex);
-}
-
-void AMonitor::SwitchToNextCCTV()
-{
-	// 다음 인덱스로 전환합니다. SwitchToCCTV 내부에서 순환 처리됩니다.
-	SwitchToCCTV(ActiveCCTVIndex + 1);
-}
-
-void AMonitor::SwitchToPrevCCTV()
-{
-	// 이전 인덱스로 전환합니다. SwitchToCCTV 내부에서 순환 처리됩니다.
-	SwitchToCCTV(ActiveCCTVIndex - 1);
+	LOG(TEXT("모니터가 CCTV 인덱스 %d로 전환되었습니다."), NextIndex);
 }

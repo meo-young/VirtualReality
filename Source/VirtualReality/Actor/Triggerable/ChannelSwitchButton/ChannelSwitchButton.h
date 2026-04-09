@@ -16,11 +16,10 @@ class VIRTUALREALITY_API AChannelSwitchButton : public ATriggerableActor, public
 // Lifecycle Function Section	
 public:
 	AChannelSwitchButton();
-	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 	
 
-// Class Member Function	
+// Member Function	
 protected:
 	virtual void OnTriggered() override;
 	void SwitchChannel();
@@ -37,15 +36,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
 	TObjectPtr<UStaticMeshComponent> ButtonMesh;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
-	TObjectPtr<UTextRenderComponent> ChannelText;
-	
 	
 // Variable Section
-protected:
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "변수|수치")
-	uint8 ChannelNum;
-	
 private:
 	FTimerHandle ChannelSwitchTimerHandle;
 	
