@@ -37,7 +37,6 @@ void ALever::Tick(float DeltaTime)
 		{
 			bIsLocked = false;
 			bIsReturning = true;
-			LOG(TEXT("잠금이 해제되었습니다. MaxAngle로 복귀합니다."));
 		}
 		return;
 	}
@@ -67,7 +66,7 @@ void ALever::Tick(float DeltaTime)
 	else
 	{
 		// 레버를 놓은 후 MinAngle에 도달하지 못했다면 MaxAngle로 복귀합니다.
-		CurrentAngle = FMath::FInterpTo(CurrentAngle, MaxAngle, DeltaTime, InterpSpeed);
+		CurrentAngle = FMath::FInterpTo(CurrentAngle, MaxAngle, DeltaTime, ControlInterpSpeed);
 		LeverMesh->SetRelativeRotation(FRotator(0.f, 0.f, CurrentAngle));
 	}
 }
@@ -122,7 +121,7 @@ void ALever::UpdateLeverAngle(float DeltaTime)
 	float TargetAngle = FMath::Clamp(GrabStartAngle + DeltaAngle, MinAngle, MaxAngle);
 
 	// InterpSpeed가 낮을수록 무거운 느낌을 줍니다.
-	CurrentAngle = FMath::FInterpTo(CurrentAngle, TargetAngle, DeltaTime, InterpSpeed);
+	CurrentAngle = FMath::FInterpTo(CurrentAngle, TargetAngle, DeltaTime, ControlInterpSpeed);
 	LeverMesh->SetRelativeRotation(FRotator(0.0f, 0.f, CurrentAngle));
 
 	// 당기는 정도에 비례하여 연속 햅틱을 재생합니다. (0=MaxAngle, 1=MinAngle)

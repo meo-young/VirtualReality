@@ -8,7 +8,8 @@ UENUM(BlueprintType)
 enum class EGrabbableType : uint8
 {
 	Free,
-	Lever
+	Lever,
+	Flash
 };
 
 UINTERFACE()

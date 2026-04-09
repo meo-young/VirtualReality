@@ -85,7 +85,7 @@ void AVRPlayer::InitVRSetting()
 	// HMD가 연결되어 있으면 발 기준 트래킹 원점으로 설정합니다.
 	if (UHeadMountedDisplayFunctionLibrary::IsHeadMountedDisplayEnabled())
 	{
-		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::LocalFloor);
+		UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::View);
 		LOG(TEXT("HMD 감지 — 트래킹 원점을 LocalFloor 설정했습니다."));
 	}
 	else

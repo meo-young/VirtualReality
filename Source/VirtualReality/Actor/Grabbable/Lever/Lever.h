@@ -11,6 +11,8 @@ class VIRTUALREALITY_API ALever : public AVRGrabbableActor
 {
 	GENERATED_BODY()
 
+	
+// Lifecycle Section	
 public:
 	ALever();
 	virtual void BeginPlay() override;
@@ -33,7 +35,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
 	TObjectPtr<USkeletalMeshComponent> LeverMesh;
 	
-
 	
 // Grab Variable Section	
 protected:	
@@ -48,7 +49,7 @@ protected:
 	float MappingRange = 20.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
-	float InterpSpeed = 8.f;
+	float ControlInterpSpeed = 8.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
 	float LockDuration = 5.f;
@@ -75,7 +76,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
 	float MinAngleHapticDuration = 0.3f;
-
 	
 	
 // Cached Section	
@@ -95,6 +95,7 @@ private:
 	uint8 bIsReturning : 1 = false;
 
 
+// Getter, Setter Section	
 public:
 	FORCEINLINE float GetCurrentAngle() const { return CurrentAngle; }
 

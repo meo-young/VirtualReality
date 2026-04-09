@@ -1,11 +1,9 @@
 #include "Monitor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "Components/SceneCaptureComponent2D.h"
 #include "Engine/TextureRenderTarget2D.h"
-#include "EnhancedInputComponent.h"
-#include "Manager/CCTVManager.h"
 #include "Actor/CCTV.h"
+#include "EngineUtils.h"
 #include "VirtualReality.h"
 #include "Components/PointLightComponent.h"
 
@@ -46,46 +44,82 @@ void AMonitor::BeginPlay()
 		ScreenMaterialInstance = UMaterialInstanceDynamic::Create(ScreenMaterial, this);
 		ScreenMesh->SetMaterial(0, ScreenMaterialInstance);
 	}
+
+	// 월드 내 모든 CCTV를 수집합니다.
+	CollectCCTVs();
+}
+
+void AMonitor::CollectCCTVs()
+{
+	RegisteredCCTVs.Reset();
+
+	for (ACCTV* CCTV : TActorRange<ACCTV>(GetWorld()))
+	{
+		RegisteredCCTVs.Emplace(CCTV);
+	}
+
+	LOG(TEXT("CCTV %d개가 수집되었습니다."), RegisteredCCTVs.Num());
+}
+
+void AMonitor::SetActiveCCTV(int32 Index)
+{
+	// 이전 활성 CCTV를 비활성화합니다.
+	if (RegisteredCCTVs.IsValidIndex(ActiveCCTVIndex))
+	{
+		RegisteredCCTVs[ActiveCCTVIndex]->SetCaptureEnabled(false);
+	}
+
+	// 새 CCTV를 활성화합니다.
+	ActiveCCTVIndex = Index;
+	RegisteredCCTVs[ActiveCCTVIndex]->SetCaptureEnabled(true);
+
+	LOG(TEXT("활성 CCTV가 인덱스 %d로 변경되었습니다."), ActiveCCTVIndex);
+}
+
+void AMonitor::DeactivateAllCCTVs()
+{
+	for (TObjectPtr<ACCTV>& CCTV : RegisteredCCTVs)
+	{
+		if (CCTV)
+		{
+			CCTV->SetCaptureEnabled(false);
+		}
+	}
+
+	ActiveCCTVIndex = -1;
+
+	LOG(TEXT("모든 CCTV가 비활성화되었습니다."));
 }
 
 void AMonitor::SwitchToCCTV(int32 Index)
 {
+	if (RegisteredCCTVs.IsEmpty()) return;
+
 	ScreenLight->SetVisibility(true);
 
-	UCCTVManager* CCTVManager = GetWorld()->GetSubsystem<UCCTVManager>();
-	if (!CCTVManager) return;
-
-	const TArray<TObjectPtr<ACCTV>>& CCTVs = CCTVManager->GetRegisteredCCTVs();
-	if (CCTVs.IsEmpty()) return;
-
 	// 인덱스를 CCTV 배열 범위 내에서 순환시킵니다.
-	const int32 ClampedIndex = (Index % CCTVs.Num() + CCTVs.Num()) % CCTVs.Num();
+	const int32 ClampedIndex = (Index % RegisteredCCTVs.Num() + RegisteredCCTVs.Num()) % RegisteredCCTVs.Num();
 
-	// CCTVManager에 활성 CCTV 전환을 요청합니다.
-	CCTVManager->SetActiveCCTV(ClampedIndex);
-	CurrentCCTVIndex = ClampedIndex;
+	// 활성 CCTV를 전환합니다.
+	SetActiveCCTV(ClampedIndex);
 
 	// 전환된 CCTV의 렌더 타겟을 화면 머티리얼에 적용합니다.
-	if (ScreenMaterialInstance)
+	if (UTextureRenderTarget2D* RenderTarget = RegisteredCCTVs[ClampedIndex]->GetRenderTarget())
 	{
-		USceneCaptureComponent2D* CaptureComp = CCTVs[ClampedIndex]->GetSceneCaptureComponent();
-		if (CaptureComp && CaptureComp->TextureTarget)
-		{
-			ScreenMaterialInstance->SetTextureParameterValue(RenderTargetParameterName, CaptureComp->TextureTarget);
-		}
+		ScreenMaterialInstance->SetTextureParameterValue(RenderTargetParameterName, RenderTarget);
 	}
 
 	LOG(TEXT("모니터가 CCTV 인덱스 %d로 전환되었습니다."), ClampedIndex);
 }
 
-void AMonitor::OnNextCCTV()
+void AMonitor::SwitchToNextCCTV()
 {
 	// 다음 인덱스로 전환합니다. SwitchToCCTV 내부에서 순환 처리됩니다.
-	SwitchToCCTV(CurrentCCTVIndex + 1);
+	SwitchToCCTV(ActiveCCTVIndex + 1);
 }
 
-void AMonitor::OnPrevCCTV()
+void AMonitor::SwitchToPrevCCTV()
 {
 	// 이전 인덱스로 전환합니다. SwitchToCCTV 내부에서 순환 처리됩니다.
-	SwitchToCCTV(CurrentCCTVIndex - 1);
+	SwitchToCCTV(ActiveCCTVIndex - 1);
 }

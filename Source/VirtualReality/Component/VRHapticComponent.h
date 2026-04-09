@@ -10,9 +10,13 @@ class VIRTUALREALITY_API UVRHapticComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	
+// Lifecycle Section	
 public:
 	UVRHapticComponent();
 
+	
+// Member Function	
 public:
 	/** 어느 손에 햅틱을 재생할지 초기화합니다. VRHand의 BeginPlay에서 호출합니다. */
 	void Initialize(EControllerHand InHandType);
@@ -26,9 +30,10 @@ public:
 	/** 햅틱을 즉시 중지합니다. */
 	void StopHaptic();
 
+	
+// Variable Section	
 private:
 	EControllerHand HandType = EControllerHand::Right;
-
 	FTimerHandle BurstTimerHandle;
 
 };

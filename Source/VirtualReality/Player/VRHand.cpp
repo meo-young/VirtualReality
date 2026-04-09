@@ -143,8 +143,6 @@ void AVRHand::Tick(float DeltaSeconds)
 	FVector CurrentLocation = MotionController->GetComponentLocation();
 	CurrentCalculatedVelocity = (CurrentLocation - LastLocation) / DeltaSeconds;
 	LastLocation = CurrentLocation;
-	
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, FString::Printf(TEXT("Hand Speed: %.2f"), CurrentCalculatedVelocity.Size()));
 }
 
 void AVRHand::GrabObject()
