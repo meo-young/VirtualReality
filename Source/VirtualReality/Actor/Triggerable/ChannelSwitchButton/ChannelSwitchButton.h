@@ -7,6 +7,7 @@
 
 class AMonitor;
 class UTextRenderComponent;
+class USpotLightComponent;
 
 UCLASS()
 class VIRTUALREALITY_API AChannelSwitchButton : public ATriggerableActor, public ISequenceable
@@ -35,6 +36,12 @@ protected:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
 	TObjectPtr<UStaticMeshComponent> ButtonMesh;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
+	TObjectPtr<UTextRenderComponent> TextRenderComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
+	TObjectPtr<USpotLightComponent> ButtonLight;
 	
 	
 // Variable Section
