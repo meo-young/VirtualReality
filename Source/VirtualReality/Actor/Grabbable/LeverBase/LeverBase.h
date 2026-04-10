@@ -4,6 +4,15 @@
 #include "Actor/Grabbable/VRGrabbableActor.h"
 #include "LeverBase.generated.h"
 
+/** 레버를 당기는 기준 축을 나타내는 열거형입니다. */
+UENUM(BlueprintType)
+enum class ELeverAxis : uint8
+{
+	X UMETA(DisplayName = "X"),
+	Y UMETA(DisplayName = "Y"),
+	Z UMETA(DisplayName = "Z"),
+};
+
 UCLASS()
 class VIRTUALREALITY_API ALeverBase : public AVRGrabbableActor
 {
@@ -26,6 +35,10 @@ public:
 // Member Function
 protected:
 	void UpdateLeverAngle(float DeltaTime);
+	
+private:
+	float GetControllerAxisValue(const FVector& Location) const;
+	FRotator GetRotationForAngle(float Angle) const;
 	
 	
 // Component Section
@@ -60,13 +73,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
 	float ReturnInterpSpeed = 10.f;
 	
+	/** 레버를 당기는 기준 축입니다. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
+	ELeverAxis LeverAxis = ELeverAxis::Y;
+
 	/** 손을 부착할 소켓 이름입니다. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|소켓")
 	FName GrabSocketName = FName(TEXT("GrabSocket"));
 	
 	
 protected:
-	float GrabStartControllerY = 0.f;
+	float GrabStartControllerAxis = 0.f;
 	float GrabStartAngle = 0.f;
 	float CurrentAngle = 0.f;
 	float LockTimer = 0.f;

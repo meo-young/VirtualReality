@@ -1,4 +1,6 @@
 #include "LeverBase.h"
+
+#include "VirtualReality.h"
 #include "Component/VRHapticComponent.h"
 #include "Player/VRHand.h"
 
@@ -13,7 +15,12 @@ void ALeverBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	CurrentAngle = LeverMesh->GetRelativeRotation().Roll;
+	const FRotator RelRot = LeverMesh->GetRelativeRotation();
+	switch (LeverAxis)
+	{
+	case ELeverAxis::X: CurrentAngle = RelRot.Pitch; break;
+	default:            CurrentAngle = RelRot.Roll;  break; // Y, Z
+	}
 }
 
 void ALeverBase::Tick(float DeltaTime)
@@ -38,7 +45,7 @@ void ALeverBase::Tick(float DeltaTime)
 	if (bIsReturning)
 	{
 		CurrentAngle = FMath::FInterpTo(CurrentAngle, StartAngle, DeltaTime, ReturnInterpSpeed);
-		LeverMesh->SetRelativeRotation(FRotator(0.f, 0.f, CurrentAngle));
+		LeverMesh->SetRelativeRotation(GetRotationForAngle(CurrentAngle));
 		if (FMath::IsNearlyEqual(CurrentAngle, StartAngle, 1.0f))
 		{
 			bIsReturning = false;
@@ -58,18 +65,37 @@ void ALeverBase::Tick(float DeltaTime)
 	{
 		// 레버를 놓은 후 EndAngle 도달하지 못했다면 StartAngle 복귀합니다.
 		CurrentAngle = FMath::FInterpTo(CurrentAngle, StartAngle, DeltaTime, ControlInterpSpeed);
-		LeverMesh->SetRelativeRotation(FRotator(0.f, 0.f, CurrentAngle));
+		LeverMesh->SetRelativeRotation(GetRotationForAngle(CurrentAngle));
+	}
+}
+
+FRotator ALeverBase::GetRotationForAngle(float Angle) const
+{
+	switch (LeverAxis)
+	{
+	case ELeverAxis::X: return FRotator(Angle, 0.f, 0.f); // Pitch
+	default:            return FRotator(0.f, 0.f, Angle); // Roll (Y, Z)
+	}
+}
+
+float ALeverBase::GetControllerAxisValue(const FVector& Location) const
+{
+	switch (LeverAxis)
+	{
+	case ELeverAxis::X: return Location.X;
+	case ELeverAxis::Z: return Location.Z;
+	default:            return Location.Y;
 	}
 }
 
 void ALeverBase::DoGrab(USkeletalMeshComponent* InComponent)
 {
 	Super::DoGrab(InComponent);
-	
+
 	// Grab 시점의 컨트롤러 위치와 레버 각도를 캐시합니다.
 	if (CachedHand)
 	{
-		GrabStartControllerY = CachedHand->GetMotionControllerLocation().Y;
+		GrabStartControllerAxis = GetControllerAxisValue(CachedHand->GetMotionControllerLocation());
 	}
 	GrabStartAngle = CurrentAngle;
 
@@ -93,16 +119,18 @@ void ALeverBase::UpdateLeverAngle(float DeltaTime)
 {
 	if (!CachedHand) return;
 
-	// 컨트롤러가 Grab 시점 대비 얼마나 Y축으로 이동했는지 계산합니다.
-	float DeltaY = CachedHand->GetMotionControllerLocation().Y - GrabStartControllerY;
+	// 컨트롤러가 Grab 시점 대비 얼마나 이동했는지 계산합니다.
+	float DeltaAxis = GetControllerAxisValue(CachedHand->GetMotionControllerLocation()) - GrabStartControllerAxis;
+	
+	LOG(TEXT("DeltaAxis : %f"), DeltaAxis);
 
-	// Delta Y를 각도로 변환합니다. (당기면 양수 → EndAngle 방향)
-	float DeltaAngle = (DeltaY / MappingRange) * (EndAngle - StartAngle) * 0.5f;
-	float TargetAngle = FMath::Clamp(GrabStartAngle + DeltaAngle, StartAngle, EndAngle);
+	// Delta를 각도로 변환합니다. (당기면 양수 → EndAngle 방향)
+	float DeltaAngle = (DeltaAxis / MappingRange) * FMath::Abs(EndAngle - StartAngle) * 0.5f;
+	float TargetAngle = FMath::Clamp(GrabStartAngle + DeltaAngle, FMath::Min(StartAngle, EndAngle), FMath::Max(StartAngle, EndAngle));
 
 	// InterpSpeed가 낮을수록 무거운 느낌을 줍니다.
 	CurrentAngle = FMath::FInterpTo(CurrentAngle, TargetAngle, DeltaTime, ControlInterpSpeed);
-	LeverMesh->SetRelativeRotation(FRotator(0.f, 0.f, CurrentAngle));
+	LeverMesh->SetRelativeRotation(GetRotationForAngle(CurrentAngle));
 
 	// EndAngle에 처음 도달했을 때 잠금을 시작하고 강한 햅틱을 재생합니다.
 	if (!bReachedEndAngle && FMath::IsNearlyEqual(CurrentAngle, EndAngle, 10.0f))
