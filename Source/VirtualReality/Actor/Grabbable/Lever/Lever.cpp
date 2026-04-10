@@ -71,9 +71,9 @@ void ALever::Tick(float DeltaTime)
 	}
 }
 
-void ALever::OnGrab(USkeletalMeshComponent* InComponent, const FVector& GrabLocation)
+void ALever::OnGrab(USkeletalMeshComponent* InComponent)
 {
-	Super::OnGrab(InComponent, GrabLocation);
+	Super::OnGrab(InComponent);
 
 	// Grab 시점의 컨트롤러 위치와 레버 각도를 캐시합니다.
 	if (CachedHand)

@@ -31,7 +31,12 @@ public:
 	void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent);
 	
 	
-// Action Binding Function Section	
+// Action Binding Function Section		
+public:
+	// GrabAction Binding Function
+	void GrabObject();
+	void ReleaseObject();
+
 protected:
 	// HandGraspAction Binding Function
 	void DoHandGrasp(const FInputActionValue& InValue);
@@ -48,10 +53,6 @@ protected:
 	// HandThumbUp Binding Function
 	void DoHandThumbUp();
 	void StopHandThumbUp();
-	
-	// GrabAction Binding Function
-	void GrabObject();
-	void ReleaseObject();
 	
 private:
 	/** 애니메이션과 물리 엔진의 비율을 설정하는 함수입니다. */

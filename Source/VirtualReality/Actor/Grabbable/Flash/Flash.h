@@ -19,7 +19,7 @@ public:
 	
 // IGrabbable Interface	
 public:
-	virtual void OnGrab(USkeletalMeshComponent* InComponent, const FVector& GrabLocation) override;
+	virtual void OnGrab(USkeletalMeshComponent* InComponent) override;
 	virtual void OnRelease(USkeletalMeshComponent* InComponent) override;
 	
 	

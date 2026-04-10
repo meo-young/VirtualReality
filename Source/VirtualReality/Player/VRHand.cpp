@@ -147,6 +147,7 @@ void AVRHand::Tick(float DeltaSeconds)
 
 void AVRHand::GrabObject()
 {
+	// GrabCollision과 겹쳐있는 액터들 중 첫 번째 액터를 가져옵니다.
 	TArray<AActor*> OverlappedActors;
 	GrabCollision->GetOverlappingActors(OverlappedActors);
 	if (OverlappedActors.IsEmpty()) return;
@@ -154,12 +155,20 @@ void AVRHand::GrabObject()
 	AActor* FirstActorUnderCollision = OverlappedActors[0];
 	if (!FirstActorUnderCollision) return;
 	
+	// 해당 액터가 잡을 수 있는 액터라면 OnGrab을 호출합니다.
+	// 만약, 이미 잡혀있는 상태라면 반환합니다.
 	CurrentlyGrabbedActor = TScriptInterface<IGrabbable>(FirstActorUnderCollision);
 	if (CurrentlyGrabbedActor)
 	{
+		if (CurrentlyGrabbedActor->IsHeld())
+		{
+			CurrentlyGrabbedActor = nullptr;
+			return;
+		}
+		
 		bIsGrabbing = true;
 		CurrentGrabbableType = CurrentlyGrabbedActor->GetGrabbableType();
-		CurrentlyGrabbedActor->OnGrab(HandMesh, GrabCollision->GetComponentLocation());
+		CurrentlyGrabbedActor->OnGrab(HandMesh);
 	}
 }
 

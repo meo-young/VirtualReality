@@ -10,13 +10,26 @@ AVRGrabbableActor::AVRGrabbableActor()
 	GrabRegion->SetCollisionProfileName(TEXT("Grabbable"));
 }
 
-void AVRGrabbableActor::OnGrab(USkeletalMeshComponent* InComponent, const FVector& GrabLocation)
+void AVRGrabbableActor::BeginPlay()
 {
+	Super::BeginPlay();
+	
+	bIsLocked = false;
+}
+
+void AVRGrabbableActor::OnGrab(USkeletalMeshComponent* InComponent)
+{
+	if (bIsLocked || bIsHeld) return;
+	
+	bIsHeld = true;
+	
 	CachedHand = Cast<AVRHand>(InComponent->GetOwner());
 	if (CachedHand)
 	{
 		CachedHand->GetHapticComponent()->PlayHaptic(GrabHapticFrequency, GrabHapticAmplitude);
 	}
+	
+	DoGrab(InComponent);
 }
 
 void AVRGrabbableActor::OnRelease(USkeletalMeshComponent* InComponent)
@@ -25,7 +38,18 @@ void AVRGrabbableActor::OnRelease(USkeletalMeshComponent* InComponent)
 	{
 		CachedHand->GetHapticComponent()->StopHaptic();
 	}
+	
+	DoRelease(InComponent);
 
 	CachedHand = nullptr;
+	bIsHeld = false;
+}
+
+void AVRGrabbableActor::DoGrab(USkeletalMeshComponent* InComponent)
+{
+}
+
+void AVRGrabbableActor::DoRelease(USkeletalMeshComponent* InComponent)
+{
 }
 

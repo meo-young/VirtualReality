@@ -1,8 +1,8 @@
 #include "GrabbableFree.h"
 
-void AGrabbableFree::OnGrab(USkeletalMeshComponent* InComponent, const FVector& GrabLocation)
+void AGrabbableFree::OnGrab(USkeletalMeshComponent* InComponent)
 {
-	Super::OnGrab(InComponent, GrabLocation);
+	Super::OnGrab(InComponent);
 	
 	Mesh->SetSimulatePhysics(false);
 	bIsHeld = Mesh->AttachToComponent(InComponent, FAttachmentTransformRules::KeepWorldTransform);
