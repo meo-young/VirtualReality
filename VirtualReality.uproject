@@ -66,5 +66,8 @@
 			"Name": "Aura",
 			"Enabled": true
 		}
+	],
+	"TargetPlatforms": [
+		"Windows"
 	]
 }

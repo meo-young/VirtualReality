@@ -122,8 +122,6 @@ void ALeverBase::UpdateLeverAngle(float DeltaTime)
 	// 컨트롤러가 Grab 시점 대비 얼마나 이동했는지 계산합니다.
 	float DeltaAxis = GetControllerAxisValue(CachedHand->GetMotionControllerLocation()) - GrabStartControllerAxis;
 	
-	LOG(TEXT("DeltaAxis : %f"), DeltaAxis);
-
 	// Delta를 각도로 변환합니다. (당기면 양수 → EndAngle 방향)
 	float DeltaAngle = (DeltaAxis / MappingRange) * FMath::Abs(EndAngle - StartAngle) * 0.5f;
 	float TargetAngle = FMath::Clamp(GrabStartAngle + DeltaAngle, FMath::Min(StartAngle, EndAngle), FMath::Max(StartAngle, EndAngle));
@@ -131,14 +129,14 @@ void ALeverBase::UpdateLeverAngle(float DeltaTime)
 	// InterpSpeed가 낮을수록 무거운 느낌을 줍니다.
 	CurrentAngle = FMath::FInterpTo(CurrentAngle, TargetAngle, DeltaTime, ControlInterpSpeed);
 	LeverMesh->SetRelativeRotation(GetRotationForAngle(CurrentAngle));
-
+	
 	// EndAngle에 처음 도달했을 때 잠금을 시작하고 강한 햅틱을 재생합니다.
 	if (!bReachedEndAngle && FMath::IsNearlyEqual(CurrentAngle, EndAngle, 10.0f))
 	{
 		bReachedEndAngle = true;
 		bIsLocked = true;
 		LockTimer = 0.f;
-		CachedHand->GetHapticComponent()->PlayHapticBurst(BurstHapticFrequency, BurstHapticAmplitude, BurstHapticDuration);
+		CachedHand->GetHapticComponent()->PlayHapticBurst(BurstHapticScale, BurstHapticDuration);
 		CachedHand->ReleaseObject();
 	}
 }

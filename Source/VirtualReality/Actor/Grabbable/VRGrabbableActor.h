@@ -41,10 +41,7 @@ protected:
 	
 // Haptic Feedback Section	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
-	float GrabHapticFrequency = 0.4f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
-	float GrabHapticAmplitude = 0.4f;
+	float GrabHapticScale = 0.4f;
 	
 	
 // Cached Section

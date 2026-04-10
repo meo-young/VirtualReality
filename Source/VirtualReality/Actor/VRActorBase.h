@@ -27,10 +27,7 @@ protected:
 // Haptic Feedback Section	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
-	float BurstHapticFrequency = 1.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
-	float BurstHapticAmplitude = 1.0f;
+	float BurstHapticScale = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
 	float BurstHapticDuration = 0.3f;

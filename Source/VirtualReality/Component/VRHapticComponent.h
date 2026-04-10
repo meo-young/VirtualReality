@@ -14,7 +14,8 @@ class VIRTUALREALITY_API UVRHapticComponent : public UActorComponent
 // Lifecycle Section	
 public:
 	UVRHapticComponent();
-
+	virtual void BeginPlay() override;
+	
 	
 // Member Function	
 public:
@@ -22,18 +23,32 @@ public:
 	void Initialize(EControllerHand InHandType);
 
 	/** 연속 햅틱을 재생합니다. (매 Tick 호출 가능) */
-	void PlayHaptic(float Frequency, float Amplitude);
+	void PlayHaptic(const float InScale);
 
 	/** 지정한 시간 동안 햅틱을 재생한 뒤 자동으로 중지합니다. */
-	void PlayHapticBurst(float Frequency, float Amplitude, float Duration);
+	void PlayHapticBurst(const float InScale, const float Duration);
 
-	/** 햅틱을 즉시 중지합니다. */
+	/** 연속 햅틱을 즉시 중지합니다. */
 	void StopHaptic();
+	
+private:
+	/** 버스트 중인 햅틱을 즉시 중지합니다. */
+	void StopBurstHaptic();
+	
+	
+// Haptic Section	
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|햅틱")
+	TObjectPtr<UHapticFeedbackEffect_Base> HapticEffect;
 
 	
 // Variable Section	
 private:
 	EControllerHand HandType = EControllerHand::Right;
 	FTimerHandle BurstTimerHandle;
+	uint8 bIsBursting : 1 = false;
+	
+	UPROPERTY()
+	APlayerController* CachedPC;
 
 };

@@ -31,7 +31,7 @@ void ATriggerableActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AAct
 	
 	if (AVRHand* Hand = Cast<AVRHand>(OtherActor))
 	{
-		Hand->GetHapticComponent()->PlayHapticBurst(BurstHapticFrequency, BurstHapticAmplitude, BurstHapticDuration);
+		Hand->GetHapticComponent()->PlayHapticBurst(BurstHapticScale, BurstHapticDuration);
 		OnTriggered();
 	}
 }

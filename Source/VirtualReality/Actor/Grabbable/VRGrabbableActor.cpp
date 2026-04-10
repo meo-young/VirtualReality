@@ -24,9 +24,11 @@ void AVRGrabbableActor::OnGrab(USkeletalMeshComponent* InComponent)
 	bIsHeld = true;
 	
 	CachedHand = Cast<AVRHand>(InComponent->GetOwner());
+	
 	if (CachedHand)
 	{
-		CachedHand->GetHapticComponent()->PlayHaptic(GrabHapticFrequency, GrabHapticAmplitude);
+		// 레버를 당기는 동안 연속 진동을 재생합니다.
+		CachedHand->GetHapticComponent()->PlayHaptic(GrabHapticScale);
 	}
 	
 	DoGrab(InComponent);

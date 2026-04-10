@@ -21,4 +21,7 @@ AEntityClearLever::AEntityClearLever()
 
 	// Animation 처리를 위한 Grabbable 타입을 지정합니다.
 	GrabbableType = EGrabbableType::EntityClearLever;
+	
+	// 레버의 작동 축을 결정합니다.
+	LeverAxis = ELeverAxis::Y;
 }
