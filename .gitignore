@@ -1,4 +1,5 @@
 # Visual Studio 2015 user specific files
+/Package
 .vs/
 
 # Compiled Object files

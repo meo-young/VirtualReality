@@ -4,15 +4,7 @@ void UConsoleCommandSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 	
-	// 콘솔 커맨드를 실행합니다.
-	if (GEngine)
-	{
-		// FPS 통계 표시를 활성화합니다.
-		GEngine->Exec(GetWorld(), TEXT("Stat FPS"));
-		
-	}
-	
-	// 최대 FPS를 200으로 설정합니다.
+	// 최대 FPS를 999으로 설정합니다.
 	IConsoleManager::Get().FindConsoleVariable(TEXT("t.MaxFPS"))->Set(999);
 
 	// 렌더링 해상도 비율을 75%로 설정합니다. (값이 낮을수록 성능은 좋아지지만 화질은 떨어집니다)
