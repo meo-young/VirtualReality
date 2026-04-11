@@ -2,12 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "Actor/Grabbable/VRGrabbableActor.h"
+#include "Interface/Interactable.h"
 #include "Flash.generated.h"
 
 class USpotLightComponent;
 
 UCLASS()
-class VIRTUALREALITY_API AFlash : public AVRGrabbableActor
+class VIRTUALREALITY_API AFlash : public AVRGrabbableActor, public IInteractable
 {
 	GENERATED_BODY()
 	
@@ -15,12 +16,18 @@ class VIRTUALREALITY_API AFlash : public AVRGrabbableActor
 // Lifecycle Section	
 public:
 	AFlash();
+	virtual void BeginPlay() override;
 	
 	
 // IGrabbable Interface	
 public:
-	virtual void OnGrab(USkeletalMeshComponent* InComponent) override;
-	virtual void OnRelease(USkeletalMeshComponent* InComponent) override;
+	virtual void DoGrab(USkeletalMeshComponent* InComponent) override;
+	virtual void DoRelease(USkeletalMeshComponent* InComponent) override;
+	
+	
+// IInteractable Interface	
+public:	
+	virtual void Interact() override;
 	
 	
 // Component Section	
@@ -31,7 +38,10 @@ protected:
 	
 // Grab Section	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|소켓")
-	FName GrabSocketName = FName(TEXT("GrabSocket"));
+	FName RightGrabSocketName = FName(TEXT("FlashSocket_R"));
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|소켓")
+	FName LeftGrabSocketName = FName(TEXT("FlashSocket_L"));
 
 
 };

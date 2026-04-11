@@ -1,5 +1,4 @@
 #include "LeverBase.h"
-
 #include "VirtualReality.h"
 #include "Component/VRHapticComponent.h"
 #include "Player/VRHand.h"

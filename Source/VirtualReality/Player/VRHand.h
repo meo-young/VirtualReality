@@ -5,6 +5,7 @@
 #include "MotionControllerComponent.h"
 #include "VRHand.generated.h"
 
+class IInteractable;
 enum class EGrabbableType : uint8;
 class UPhysicsConstraintComponent;
 class IGrabbable;
@@ -43,6 +44,7 @@ protected:
 	void StopHandGrasp();
 	
 	// HandIndexCurl Binding Function
+	void DoInteract();
 	void DoHandIndexCurl(const FInputActionValue& InValue);
 	void StopHandIndexCurl();
 	
@@ -125,7 +127,11 @@ private:
 	UPROPERTY()
 	TObjectPtr<UVRHandAnimInstance> AnimInstance;
 	
-	TScriptInterface<IGrabbable> CurrentlyGrabbedActor;
+	UPROPERTY()
+	TObjectPtr<AActor> CurrentGrabbedActor;
+	
+	TScriptInterface<IGrabbable> CachedGrabbable;
+	TScriptInterface<IInteractable> CachedInteractable;
 	
 	FVector LastLocation;
 	FVector CurrentCalculatedVelocity;
@@ -136,5 +142,6 @@ public:
 	FORCEINLINE EGrabbableType GetCurrentGrabbableType() const { return CurrentGrabbableType; }
 	FORCEINLINE FVector GetMotionControllerLocation() const { return MotionController->GetComponentLocation(); }
 	FORCEINLINE UVRHapticComponent* GetHapticComponent() const { return HapticComponent; }
+	FORCEINLINE EControllerHand GetHandType() const { return HandType; }
 	
 };

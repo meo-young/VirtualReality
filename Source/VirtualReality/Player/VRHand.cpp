@@ -9,6 +9,7 @@
 #include "Components/WidgetInteractionComponent.h"
 #include "Define/Define.h"
 #include "Interface/Grabbable.h"
+#include "Interface/Interactable.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 
 
@@ -71,6 +72,7 @@ void AVRHand::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		if (HandIndexCurlAction)
 		{
 			EIC->BindAction(HandIndexCurlAction, ETriggerEvent::Triggered, this, &AVRHand::DoHandIndexCurl);
+			EIC->BindAction(HandIndexCurlAction, ETriggerEvent::Started, this, &AVRHand::DoInteract);
 			EIC->BindAction(HandIndexCurlAction, ETriggerEvent::Canceled, this, &AVRHand::StopHandIndexCurl);
 			EIC->BindAction(HandIndexCurlAction, ETriggerEvent::Completed, this, &AVRHand::StopHandIndexCurl);
 		}
@@ -152,23 +154,23 @@ void AVRHand::GrabObject()
 	GrabCollision->GetOverlappingActors(OverlappedActors);
 	if (OverlappedActors.IsEmpty()) return;
 	
-	AActor* FirstActorUnderCollision = OverlappedActors[0];
-	if (!FirstActorUnderCollision) return;
+	CurrentGrabbedActor = OverlappedActors[0];
+	if (!CurrentGrabbedActor) return;
 	
 	// 해당 액터가 잡을 수 있는 액터라면 OnGrab을 호출합니다.
 	// 만약, 이미 잡혀있는 상태라면 반환합니다.
-	CurrentlyGrabbedActor = TScriptInterface<IGrabbable>(FirstActorUnderCollision);
-	if (CurrentlyGrabbedActor)
+	CachedGrabbable = TScriptInterface<IGrabbable>(CurrentGrabbedActor);
+	if (CachedGrabbable)
 	{
-		if (CurrentlyGrabbedActor->IsHeld())
+		if (CachedGrabbable->IsHeld())
 		{
-			CurrentlyGrabbedActor = nullptr;
+			CachedGrabbable = nullptr;
 			return;
 		}
 		
 		bIsGrabbing = true;
-		CurrentGrabbableType = CurrentlyGrabbedActor->GetGrabbableType();
-		CurrentlyGrabbedActor->OnGrab(HandMesh);
+		CurrentGrabbableType = CachedGrabbable->GetGrabbableType();
+		CachedGrabbable->OnGrab(HandMesh);
 	}
 }
 
@@ -176,12 +178,14 @@ void AVRHand::ReleaseObject()
 {
 	bIsGrabbing = false;
 	
-	if (CurrentlyGrabbedActor)
+	if (CachedGrabbable)
 	{
-		CurrentlyGrabbedActor->OnRelease(HandMesh);
-		CurrentlyGrabbedActor = nullptr;
+		CachedGrabbable->OnRelease(HandMesh);
+		CachedGrabbable = nullptr;
 		UpdateHandPhysicsBelow(BoneName, true, 0.15f);
 	}
+	
+	CurrentGrabbedActor = nullptr;
 }
 
 void AVRHand::UpdateHandPhysicsBelow(FName InBoneName, bool bNewSimulate, float InBlendWeight)
@@ -221,6 +225,15 @@ void AVRHand::DoHandThumbUp()
 void AVRHand::StopHandGrasp()
 {
 	AnimInstance->PoseAlphaGrasp = 0.0f;
+}
+
+void AVRHand::DoInteract()
+{
+	if (CachedGrabbable)
+	{
+		CachedInteractable = TScriptInterface<IInteractable>(CurrentGrabbedActor);
+		CachedInteractable->Interact();
+	}
 }
 
 void AVRHand::StopHandIndexCurl()
