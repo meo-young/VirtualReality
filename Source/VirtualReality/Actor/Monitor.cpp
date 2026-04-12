@@ -5,7 +5,7 @@
 #include "Actor/CCTV.h"
 #include "EngineUtils.h"
 #include "VirtualReality.h"
-#include "Components/PointLightComponent.h"
+#include "Components/RectLightComponent.h"
 
 AMonitor::AMonitor()
 {
@@ -22,10 +22,10 @@ AMonitor::AMonitor()
 	ScreenMesh->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	ScreenMesh->SetRelativeScale3D(FVector(0.6f, 0.001f, 0.14f));
 	
-	ScreenLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("ScreenLight"));
-	ScreenLight->SetupAttachment(ScreenMesh);
-	ScreenLight->SetIntensityUnits(ELightUnits::Unitless);
-	ScreenLight->SetVisibility(false);
+	ScreenRectLight = CreateDefaultSubobject<URectLightComponent>(TEXT("ScreenLight"));
+	ScreenRectLight->SetupAttachment(ScreenMesh);
+	ScreenRectLight->SetIntensityUnits(ELightUnits::Unitless);
+	ScreenRectLight->SetVisibility(false);
 	
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_Monitor(TEXT("/Game/AtmosphericHouse/Meshes/Meshes_props/Electronics/SM_Computer_screen"));
 	if (SM_Monitor.Succeeded())
@@ -95,7 +95,7 @@ void AMonitor::SwitchToNextCCTV()
 {
 	if (RegisteredCCTVs.IsEmpty()) return;
 
-	ScreenLight->SetVisibility(true);
+	ScreenRectLight->SetVisibility(true);
 
 	// 다음 인덱스로 순환시킵니다.
 	const int32 NextIndex = (ActiveCCTVIndex + 1) % RegisteredCCTVs.Num();

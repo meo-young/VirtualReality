@@ -5,7 +5,7 @@
 #include "Monitor.generated.h"
 
 class ACCTV;
-class UPointLightComponent;
+class URectLightComponent;
 class UStaticMeshComponent;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
@@ -45,7 +45,7 @@ protected:
 	TObjectPtr<UStaticMeshComponent> ScreenMesh;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
-	TObjectPtr<UPointLightComponent> ScreenLight;
+	TObjectPtr<URectLightComponent> ScreenRectLight;
 	
 	
 // Variable Section	
