@@ -40,14 +40,23 @@ public:
 	UFUNCTION()
 	void StopEventCycle();
 
+	/** EntityClearLever가 끝까지 내려졌을 때 호출되는 콜백입니다. */
+	void OnLeverReachedEnd();
+
 	/** Monitor의 채널 전환 델리게이트 콜백입니다. */
-	void OnMonitorChangedDelegate(ACCTV* InWatchedCCTV);
+	void OnMonitorChanged(ACCTV* InWatchedCCTV);
 
 private:
 	void PlayNextEvent();
 
 	/** 가중치 기반으로 다음 이벤트를 재생할 Zone의 CCTV를 반환합니다. 소진 시 nullptr을 반환합니다. */
 	ACCTV* SelectZone();
+
+	/** 감시 중인 구역에 발생한 이벤트가 없을 때 처리합니다. */
+	void HandleNoPlayedEvents();
+
+	/** 감시 중인 구역에서 재생된 이벤트의 장소 상태를 복원합니다. */
+	void RestoreWatchedZoneState(FEventInfo& PlayedInfo);
 
 
 // Variable Section
@@ -66,5 +75,9 @@ private:
 	/** 현재 Monitor가 감시 중인 CCTV입니다. 해당 구역의 이벤트는 선택에서 제외됩니다. */
 	UPROPERTY()
 	TObjectPtr<ACCTV> WatchedCCTV;
+
+	/** Zone별로 재생된 이벤트 목록입니다. 장소 상태 복원 대상 추적에 사용됩니다. */
+	UPROPERTY()
+	TMap<TObjectPtr<ACCTV>, FEventInfo> PlayedEventsByZone;
 
 };

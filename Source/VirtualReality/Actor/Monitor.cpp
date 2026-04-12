@@ -71,7 +71,7 @@ void AMonitor::DeactivateAllCCTVs()
 
 void AMonitor::SwitchToNextCCTV()
 {
-	if (RegisteredCCTVs.IsEmpty()) return;
+	if (RegisteredCCTVs.IsEmpty() || bIsScanning) return;
 	
 	// 현재 CCTV의 캡쳐를 비활성화합니다.
 	SetActiveCCTV(false);
@@ -92,6 +92,21 @@ void AMonitor::SwitchToNextCCTV()
 	{
 		OnMonitorChangedDelegate.Broadcast(RegisteredCCTVs[ActiveCCTVIndex]);
 	}
+}
+
+void AMonitor::OnLeverReachedEnd()
+{
+	bIsScanning = true;
+	ScreenMesh->SetMaterial(0, ScanningMaterial);
+
+	// ScanningDuration 후 원래 머티리얼로 복원합니다.
+	GetWorldTimerManager().SetTimer(ScanningTimerHandle, this, &AMonitor::RestoreScreenMaterial, ScanningDuration, false);
+}
+
+void AMonitor::RestoreScreenMaterial()
+{
+	bIsScanning = false;
+	ScreenMesh->SetMaterial(0, ScreenMaterialInstance);
 }
 
 void AMonitor::ApplyNextCCTV()

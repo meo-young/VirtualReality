@@ -33,12 +33,15 @@ public:
 public:
 	UFUNCTION(BlueprintCallable)
 	void SwitchToNextCCTV();
+	
+	void OnLeverReachedEnd();
 
 private:
 	void SetActiveCCTV(bool bIsEnable);
 	void DeactivateAllCCTVs();
 	void ApplyNextCCTV();
 	void SetScreenMaterial(const float InNoisePower, const float InNoiseIntensity, UTextureRenderTarget2D* InRenderTarget);
+	void RestoreScreenMaterial();
 
 	
 // Component Section	
@@ -58,6 +61,10 @@ protected:
 	
 // Variable Section	
 protected:
+	/** 렌더 타겟을 표시할 화면 머티리얼입니다. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Screen")
+	TObjectPtr<UMaterialInterface> ScanningMaterial;
+	
 	/** 렌더 타겟을 표시할 화면 머티리얼입니다. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Screen")
 	TObjectPtr<UMaterialInterface> ScreenMaterial;
@@ -81,6 +88,10 @@ protected:
 	/** 채널 전환 시 노이즈를 적용할 시간입니다. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Screen")
 	float NoiseEffectDuration = 0.5f;
+
+	/** SCANNING 머티리얼을 유지할 시간입니다. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Screen")
+	float ScanningDuration = 2.0f;
 	
 	/** 모니터에 출력할 CCTV 액터 목록입니다. 레벨에 배치된 CCTV 액터를 수동으로 등록해야 합니다.
 	 * 
@@ -95,6 +106,8 @@ private:
 	
 	int32 ActiveCCTVIndex = 0;
 	FTimerHandle SwitchTimerHandle;
+	FTimerHandle ScanningTimerHandle;
+	uint8 bIsScanning : 1 = false;
 
 
 // Getter, Setter Section

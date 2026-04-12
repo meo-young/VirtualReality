@@ -132,12 +132,17 @@ void ALeverBase::UpdateLeverAngle(float DeltaTime)
 	LeverMesh->SetRelativeRotation(GetRotationForAngle(CurrentAngle));
 	
 	// EndAngle에 처음 도달했을 때 잠금을 시작하고 강한 햅틱을 재생합니다.
-	if (!bReachedEndAngle && FMath::IsNearlyEqual(CurrentAngle, EndAngle, 10.0f))
+	if (!bReachedEndAngle && FMath::IsNearlyEqual(CurrentAngle, EndAngle, 15.0f))
 	{
 		bReachedEndAngle = true;
 		bIsLocked = true;
 		LockTimer = 0.f;
 		CachedHand->GetHapticComponent()->PlayHapticBurst(BurstHapticScale, BurstHapticDuration);
 		CachedHand->ReleaseObject();
+		
+		if (OnLeverReachedEndDelegate.IsBound())
+		{
+			OnLeverReachedEndDelegate.Broadcast();
+		}
 	}
 }

@@ -35,15 +35,12 @@ void AEventManager::PlayNextEvent()
 
 	// Zone 내 랜덤 이벤트를 선택합니다.
 	const int32 EventIndex = FMath::RandRange(0, Zone.Events.Num() - 1);
-	ALevelSequenceActor* SelectedActor = Zone.Events[EventIndex];
-
-	// 패널티 가중치를 누적하고 재생한 이벤트를 배열에서 제거합니다.
+	Zone.Events[EventIndex]->GetSequencePlayer()->Play();
+	
+	// 패널티 가중치를 누적하고, 재생한 이벤트를 PlayedEventsByZone으로 이동합니다.
 	Zone.EventPenaltyWeight += 1.f;
+	PlayedEventsByZone.FindOrAdd(SelectedCCTV).Events.Add(Zone.Events[EventIndex]);
 	Zone.Events.RemoveAt(EventIndex);
-
-	// 레벨에 배치된 LevelSequenceActor의 플레이어를 직접 사용하여 재생합니다.
-	ULevelSequencePlayer* Player = SelectedActor->GetSequencePlayer();
-	Player->Play();
 
 	LOG(TEXT("이벤트 %d를 재생합니다. (잔여: %d개)"), EventIndex, Zone.Events.Num());
 
@@ -51,7 +48,48 @@ void AEventManager::PlayNextEvent()
 	GetWorldTimerManager().SetTimer(EventTimerHandle, this, &AEventManager::PlayNextEvent, EventInterval, false);
 }
 
-void AEventManager::OnMonitorChangedDelegate(ACCTV* InWatchedCCTV)
+void AEventManager::OnLeverReachedEnd()
+{
+	if (!WatchedCCTV) return;
+
+	FEventInfo* PlayedInfo = PlayedEventsByZone.Find(WatchedCCTV);
+	if (!PlayedInfo || PlayedInfo->Events.IsEmpty())
+	{
+		HandleNoPlayedEvents();
+	}
+	else
+	{
+		RestoreWatchedZoneState(*PlayedInfo);
+	}
+}
+
+void AEventManager::HandleNoPlayedEvents()
+{
+	LOG(TEXT("감시 중인 구역에서 발생한 이벤트가 없습니다."));
+}
+
+void AEventManager::RestoreWatchedZoneState(FEventInfo& PlayedInfo)
+{
+	// 재생된 이벤트의 상태를 LevelSequence 재생 이전으로 복원합니다.
+	for (ALevelSequenceActor* Event : PlayedInfo.Events)
+	{
+		if (!Event) continue;
+		ULevelSequencePlayer* Player = Event->GetSequencePlayer();
+		if (!Player) continue;
+
+		// 재생 중인 경우 먼저 중단합니다.
+		if (Player->IsPlaying())
+		{
+			Player->Stop();
+		}
+	}
+
+	PlayedEventsByZone.Remove(WatchedCCTV);
+
+	LOG(TEXT("감시 중인 구역의 이벤트 장소 상태가 복원되었습니다."));
+}
+
+void AEventManager::OnMonitorChanged(ACCTV* InWatchedCCTV)
 {
 	// 현재 감시 중인 CCTV를 캐싱합니다.
 	WatchedCCTV = InWatchedCCTV;

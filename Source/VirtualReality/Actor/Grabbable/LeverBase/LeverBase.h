@@ -13,6 +13,8 @@ enum class ELeverAxis : uint8
 	Z UMETA(DisplayName = "Z"),
 };
 
+DECLARE_MULTICAST_DELEGATE(FOnLeverReachedEndDelegate);
+
 UCLASS()
 class VIRTUALREALITY_API ALeverBase : public AVRGrabbableActor
 {
@@ -30,6 +32,11 @@ public:
 public:
 	virtual void DoGrab(USkeletalMeshComponent* InComponent) override;
 	virtual void DoRelease(USkeletalMeshComponent* InComponent) override;	
+	
+
+// Delegate Section	
+public:
+	FOnLeverReachedEndDelegate OnLeverReachedEndDelegate;
 	
 	
 // Member Function
