@@ -7,3 +7,4 @@ T_Floor_wooden_A_worn_wornmaps.normal.uasset filter=lfs diff=lfs merge=lfs -text
 T_Floor_wooden_A_worn_wornmaps_Normal.uasset filter=lfs diff=lfs merge=lfs -text
 SM_Ind_Con_Pile_Rubble_Gravel_Patch_01.uasset filter=lfs diff=lfs merge=lfs -text
 SM_Ind_Rubble_Debris_Pile_Gravel_M_01.uasset filter=lfs diff=lfs merge=lfs -text
+SM_Ind_Ware_Storage_Shelf_Metal_Rusted_01.uasset filter=lfs diff=lfs merge=lfs -text
