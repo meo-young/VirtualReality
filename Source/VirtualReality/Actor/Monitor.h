@@ -10,6 +10,8 @@ class UStaticMeshComponent;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
 
+DECLARE_MULTICAST_DELEGATE(FOnMonitorChangedDelegate);
+
 UCLASS()
 class VIRTUALREALITY_API AMonitor : public AActor
 {
@@ -22,6 +24,11 @@ public:
 	virtual void BeginPlay() override;
 	
 	
+// Delegate Section	
+public:
+	FOnMonitorChangedDelegate OnMonitorChangedDelegate;
+	
+	
 // Member Function	
 public:
 	UFUNCTION(BlueprintCallable)
@@ -31,6 +38,7 @@ private:
 	void CollectCCTVs();
 	void SetActiveCCTV(int32 Index);
 	void DeactivateAllCCTVs();
+	void ApplyNextCCTV();
 
 	
 // Component Section	
@@ -57,6 +65,18 @@ protected:
 	/** 렌더 타겟 텍스처를 연결할 머티리얼 파라미터 이름입니다. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
 	FName RenderTargetParameterName = TEXT("RenderTarget");
+	
+	/** CCTV 전환 시 출력할 노이즈 파라미터 이름입니다. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
+	FName NoiseParameterName = TEXT("TV.Noise.Power");
+	
+	/** 노이즈 출력 시 모니터에 적용할 텍스처입니다. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
+	UTextureRenderTarget2D* BlackRenderTarget = nullptr;
+	
+	/** 채널 전환 시 노이즈를 적용할 시간입니다. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
+	float NoiseEffectDuration = 0.5f;
 
 private:
 	UPROPERTY()
@@ -64,6 +84,8 @@ private:
 
 	TArray<TObjectPtr<ACCTV>> RegisteredCCTVs;
 	int32 ActiveCCTVIndex = -1;
+	int32 PendingCCTVIndex = -1;
+	FTimerHandle SwitchTimerHandle;
 
 
 // Getter, Setter Section

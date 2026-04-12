@@ -97,17 +97,41 @@ void AMonitor::SwitchToNextCCTV()
 
 	ScreenRectLight->SetVisibility(true);
 
-	// 다음 인덱스로 순환시킵니다.
-	const int32 NextIndex = (ActiveCCTVIndex + 1) % RegisteredCCTVs.Num();
+	// 다음 인덱스를 미리 계산하여 저장합니다.
+	PendingCCTVIndex = (ActiveCCTVIndex + 1) % RegisteredCCTVs.Num();
+
+	// 노이즈 파라미터를 10으로 설정하여 전환 효과를 연출합니다.
+	if (ScreenMaterialInstance)
+	{
+		ScreenMaterialInstance->SetScalarParameterValue(NoiseParameterName, 10.f);
+		ScreenMaterialInstance->SetTextureParameterValue(RenderTargetParameterName, BlackRenderTarget);
+	}
+
+	// 일정 시간 후 실제 CCTV 전환을 수행합니다.
+	GetWorldTimerManager().SetTimer(SwitchTimerHandle, this, &AMonitor::ApplyNextCCTV, NoiseEffectDuration, false);
+}
+
+void AMonitor::ApplyNextCCTV()
+{
+	// 노이즈 파라미터를 원래 값으로 복원합니다.
+	if (ScreenMaterialInstance)
+	{
+		ScreenMaterialInstance->SetScalarParameterValue(NoiseParameterName, 3.f);
+	}
 
 	// 활성 CCTV를 전환합니다.
-	SetActiveCCTV(NextIndex);
+	SetActiveCCTV(PendingCCTVIndex);
 
 	// 전환된 CCTV의 렌더 타겟을 화면 머티리얼에 적용합니다.
-	if (UTextureRenderTarget2D* RenderTarget = RegisteredCCTVs[NextIndex]->GetRenderTarget())
+	if (UTextureRenderTarget2D* RenderTarget = RegisteredCCTVs[PendingCCTVIndex]->GetRenderTarget())
 	{
 		ScreenMaterialInstance->SetTextureParameterValue(RenderTargetParameterName, RenderTarget);
 	}
+	
+	if (OnMonitorChangedDelegate.IsBound())
+	{
+		OnMonitorChangedDelegate.Broadcast();
+	}
 
-	LOG(TEXT("모니터가 CCTV 인덱스 %d로 전환되었습니다."), NextIndex);
+	LOG(TEXT("모니터가 CCTV 인덱스 %d로 전환되었습니다."), PendingCCTVIndex);
 }
