@@ -10,7 +10,7 @@ class UStaticMeshComponent;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
 
-DECLARE_MULTICAST_DELEGATE(FOnMonitorChangedDelegate);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMonitorChangedDelegate, ACCTV*);
 
 UCLASS()
 class VIRTUALREALITY_API AMonitor : public AActor
@@ -35,10 +35,10 @@ public:
 	void SwitchToNextCCTV();
 
 private:
-	void CollectCCTVs();
-	void SetActiveCCTV(int32 Index);
+	void SetActiveCCTV(bool bIsEnable);
 	void DeactivateAllCCTVs();
 	void ApplyNextCCTV();
+	void SetScreenMaterial(const float InNoisePower, const float InNoiseIntensity, UTextureRenderTarget2D* InRenderTarget);
 
 	
 // Component Section	
@@ -59,32 +59,41 @@ protected:
 // Variable Section	
 protected:
 	/** 렌더 타겟을 표시할 화면 머티리얼입니다. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Screen")
 	TObjectPtr<UMaterialInterface> ScreenMaterial;
 
 	/** 렌더 타겟 텍스처를 연결할 머티리얼 파라미터 이름입니다. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Screen")
 	FName RenderTargetParameterName = TEXT("RenderTarget");
 	
-	/** CCTV 전환 시 출력할 노이즈 파라미터 이름입니다. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
-	FName NoiseParameterName = TEXT("TV.Noise.Power");
+	/** CCTV 전환 시 출력할 노이즈 속도 파라미터 이름입니다. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Screen")
+	FName NoisePowerParameterName = TEXT("TV.Noise.Power");
+	
+	/** CCTV 전환 시 출력할 노이즈 강도 파라미터 이름입니다. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Screen")
+	FName NoiseIntensityParameterName = TEXT("TV.Noise.Intensity");
 	
 	/** 노이즈 출력 시 모니터에 적용할 텍스처입니다. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Screen")
 	UTextureRenderTarget2D* BlackRenderTarget = nullptr;
 	
 	/** 채널 전환 시 노이즈를 적용할 시간입니다. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Screen")
 	float NoiseEffectDuration = 0.5f;
+	
+	/** 모니터에 출력할 CCTV 액터 목록입니다. 레벨에 배치된 CCTV 액터를 수동으로 등록해야 합니다.
+	 * 
+	 * 0 : Locker, 1 : Corridor, 2 : EmptyLot,  3 : Exit
+	 */
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "변수|CCTV")
+	TArray<TObjectPtr<ACCTV>> RegisteredCCTVs;
 
 private:
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> ScreenMaterialInstance;
-
-	TArray<TObjectPtr<ACCTV>> RegisteredCCTVs;
-	int32 ActiveCCTVIndex = -1;
-	int32 PendingCCTVIndex = -1;
+	
+	int32 ActiveCCTVIndex = 0;
 	FTimerHandle SwitchTimerHandle;
 
 

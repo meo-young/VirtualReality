@@ -41,6 +41,8 @@ void ACCTV::BeginPlay()
 
 void ACCTV::SetCaptureEnabled(bool bEnabled)
 {
+	SceneCaptureComponent->SetActive(bEnabled);
+
 	if (bEnabled)
 	{
 		GetWorldTimerManager().SetTimer(
@@ -49,15 +51,13 @@ void ACCTV::SetCaptureEnabled(bool bEnabled)
 			&ThisClass::CaptureScene,
 			CaptureInterval,
 			true,
-			true
-		);	
+			false
+		);
 	}
 	else
 	{
 		GetWorldTimerManager().ClearTimer(CaptureTimerHandle);
 	}
-
-	LOG(TEXT("CCTV 캡처 상태가 [%s]로 변경되었습니다."), bEnabled ? TEXT("활성화") : TEXT("비활성화"));
 }
 
 void ACCTV::CaptureScene()

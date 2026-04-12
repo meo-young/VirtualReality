@@ -232,7 +232,10 @@ void AVRHand::DoInteract()
 	if (CachedGrabbable)
 	{
 		CachedInteractable = TScriptInterface<IInteractable>(CurrentGrabbedActor);
-		CachedInteractable->Interact();
+		if (CachedInteractable)
+		{
+			CachedInteractable->Interact();
+		}
 	}
 }
 

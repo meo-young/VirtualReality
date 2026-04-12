@@ -8,5 +8,7 @@ UCLASS()
 class VIRTUALREALITY_API AMainGameMode : public ABaseGameMode
 {
 	GENERATED_BODY()
-	
+
+public:
+	virtual void BeginPlay() override;
 };

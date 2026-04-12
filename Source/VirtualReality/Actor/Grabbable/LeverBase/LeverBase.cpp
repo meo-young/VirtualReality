@@ -91,10 +91,11 @@ void ALeverBase::DoGrab(USkeletalMeshComponent* InComponent)
 {
 	Super::DoGrab(InComponent);
 
-	// Grab 시점의 컨트롤러 위치와 레버 각도를 캐시합니다.
+	// Grab 시점의 컨트롤러 위치를 레버 로컬 공간으로 변환하여 캐시합니다.
 	if (CachedHand)
 	{
-		GrabStartControllerAxis = GetControllerAxisValue(CachedHand->GetMotionControllerLocation());
+		const FVector LocalPos = LeverMesh->GetComponentTransform().InverseTransformPosition(CachedHand->GetMotionControllerLocation());
+		GrabStartControllerAxis = GetControllerAxisValue(LocalPos);
 	}
 	GrabStartAngle = CurrentAngle;
 
@@ -118,8 +119,9 @@ void ALeverBase::UpdateLeverAngle(float DeltaTime)
 {
 	if (!CachedHand) return;
 
-	// 컨트롤러가 Grab 시점 대비 얼마나 이동했는지 계산합니다.
-	float DeltaAxis = GetControllerAxisValue(CachedHand->GetMotionControllerLocation()) - GrabStartControllerAxis;
+	// 컨트롤러 위치를 레버 로컬 공간으로 변환하여 이동량을 계산합니다.
+	const FVector LocalPos = LeverMesh->GetComponentTransform().InverseTransformPosition(CachedHand->GetMotionControllerLocation());
+	float DeltaAxis = GetControllerAxisValue(LocalPos) - GrabStartControllerAxis;
 	
 	// Delta를 각도로 변환합니다. (당기면 양수 → EndAngle 방향)
 	float DeltaAngle = (DeltaAxis / MappingRange) * FMath::Abs(EndAngle - StartAngle) * 0.5f;

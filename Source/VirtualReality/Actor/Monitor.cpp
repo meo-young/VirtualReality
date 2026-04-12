@@ -44,36 +44,16 @@ void AMonitor::BeginPlay()
 		ScreenMaterialInstance = UMaterialInstanceDynamic::Create(ScreenMaterial, this);
 		ScreenMesh->SetMaterial(0, ScreenMaterialInstance);
 	}
-
-	// 월드 내 모든 CCTV를 수집합니다.
-	CollectCCTVs();
+	
+	ScreenRectLight->SetVisibility(true);
 }
 
-void AMonitor::CollectCCTVs()
+void AMonitor::SetActiveCCTV(bool bIsEnable)
 {
-	RegisteredCCTVs.Reset();
-
-	for (ACCTV* CCTV : TActorRange<ACCTV>(GetWorld()))
-	{
-		RegisteredCCTVs.Emplace(CCTV);
-	}
-
-	LOG(TEXT("CCTV %d개가 수집되었습니다."), RegisteredCCTVs.Num());
-}
-
-void AMonitor::SetActiveCCTV(int32 Index)
-{
-	// 이전 활성 CCTV를 비활성화합니다.
 	if (RegisteredCCTVs.IsValidIndex(ActiveCCTVIndex))
 	{
-		RegisteredCCTVs[ActiveCCTVIndex]->SetCaptureEnabled(false);
+		RegisteredCCTVs[ActiveCCTVIndex]->SetCaptureEnabled(bIsEnable);
 	}
-
-	// 새 CCTV를 활성화합니다.
-	ActiveCCTVIndex = Index;
-	RegisteredCCTVs[ActiveCCTVIndex]->SetCaptureEnabled(true);
-
-	LOG(TEXT("활성 CCTV가 인덱스 %d로 변경되었습니다."), ActiveCCTVIndex);
 }
 
 void AMonitor::DeactivateAllCCTVs()
@@ -86,52 +66,44 @@ void AMonitor::DeactivateAllCCTVs()
 		}
 	}
 
-	ActiveCCTVIndex = -1;
-
-	LOG(TEXT("모든 CCTV가 비활성화되었습니다."));
+	ActiveCCTVIndex = 0;
 }
 
 void AMonitor::SwitchToNextCCTV()
 {
 	if (RegisteredCCTVs.IsEmpty()) return;
-
-	ScreenRectLight->SetVisibility(true);
-
-	// 다음 인덱스를 미리 계산하여 저장합니다.
-	PendingCCTVIndex = (ActiveCCTVIndex + 1) % RegisteredCCTVs.Num();
-
-	// 노이즈 파라미터를 10으로 설정하여 전환 효과를 연출합니다.
-	if (ScreenMaterialInstance)
-	{
-		ScreenMaterialInstance->SetScalarParameterValue(NoiseParameterName, 10.f);
-		ScreenMaterialInstance->SetTextureParameterValue(RenderTargetParameterName, BlackRenderTarget);
-	}
+	
+	// 현재 CCTV의 캡쳐를 비활성화합니다.
+	SetActiveCCTV(false);
+	SetScreenMaterial(5.f, 0.1f, BlackRenderTarget);
+	
+	// 다음으로 활성화할 CCTV의 인덱스를 저장합니다.
+	ActiveCCTVIndex = (ActiveCCTVIndex + 1) % RegisteredCCTVs.Num();
+	
+	// 다음 CCTV의 캡쳐를 미리 활성화합니다.
+	SetActiveCCTV(true);
 
 	// 일정 시간 후 실제 CCTV 전환을 수행합니다.
 	GetWorldTimerManager().SetTimer(SwitchTimerHandle, this, &AMonitor::ApplyNextCCTV, NoiseEffectDuration, false);
+	
+	// 채널 전환 델리게이트를 호출합니다.
+	// EventManager가 다음 CCTV의 이벤트를 발생시키는 것을 비활성화합니다.
+	if (OnMonitorChangedDelegate.IsBound())
+	{
+		OnMonitorChangedDelegate.Broadcast(RegisteredCCTVs[ActiveCCTVIndex]);
+	}
 }
 
 void AMonitor::ApplyNextCCTV()
 {
-	// 노이즈 파라미터를 원래 값으로 복원합니다.
-	if (ScreenMaterialInstance)
-	{
-		ScreenMaterialInstance->SetScalarParameterValue(NoiseParameterName, 3.f);
-	}
+	// 다음 CCTV가 캡쳐하는 텍스처를 모니터에 적용합니다.
+	UTextureRenderTarget2D* RenderTarget = RegisteredCCTVs[ActiveCCTVIndex]->GetRenderTarget();
+	SetScreenMaterial(0.f, 0.f, RenderTarget);
+}
 
-	// 활성 CCTV를 전환합니다.
-	SetActiveCCTV(PendingCCTVIndex);
-
-	// 전환된 CCTV의 렌더 타겟을 화면 머티리얼에 적용합니다.
-	if (UTextureRenderTarget2D* RenderTarget = RegisteredCCTVs[PendingCCTVIndex]->GetRenderTarget())
-	{
-		ScreenMaterialInstance->SetTextureParameterValue(RenderTargetParameterName, RenderTarget);
-	}
-	
-	if (OnMonitorChangedDelegate.IsBound())
-	{
-		OnMonitorChangedDelegate.Broadcast();
-	}
-
-	LOG(TEXT("모니터가 CCTV 인덱스 %d로 전환되었습니다."), PendingCCTVIndex);
+void AMonitor::SetScreenMaterial(const float InNoisePower, const float InNoiseIntensity, UTextureRenderTarget2D* InRenderTarget)
+{
+	ScreenMaterialInstance->SetScalarParameterValue(NoisePowerParameterName, InNoisePower);
+	ScreenMaterialInstance->SetScalarParameterValue(NoiseIntensityParameterName, InNoiseIntensity);
+	ScreenMaterialInstance->SetTextureParameterValue(RenderTargetParameterName, InRenderTarget);
 }
