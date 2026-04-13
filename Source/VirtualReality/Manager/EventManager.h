@@ -33,11 +33,9 @@ public:
 // Member Function
 public:
 	/** 이벤트 사이클을 시작합니다. */
-	UFUNCTION()
 	void StartEventCycle();
 
 	/** 이벤트 사이클을 중단합니다. */
-	UFUNCTION()
 	void StopEventCycle();
 
 	/** EntityClearLever가 끝까지 내려졌을 때 호출되는 콜백입니다. */

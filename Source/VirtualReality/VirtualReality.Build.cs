@@ -20,10 +20,11 @@ public class VirtualReality : ModuleRules
 			"UMG",
 			"ActorSequence",
 			"LevelSequence",
-			"MovieScene"
+			"MovieScene",
+			"SkeletalMerging"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		PrivateDependencyModuleNames.AddRange(new string[] { });
 
 		PublicIncludePaths.AddRange(new string[] { "VirtualReality" } );
 
