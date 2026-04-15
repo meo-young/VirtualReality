@@ -7,6 +7,10 @@ AEntity::AEntity()
 	// Body 컴포넌트를 루트로 설정합니다.
 	Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	SetRootComponent(Body);
+	
+	// Body의 옷을 담는 SkeletalMeshComponent를 초기화합니다.
+	ClothMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ClothMesh"));
+	ClothMesh->SetupAttachment(Body);
 }
 
 void AEntity::BeginPlay()
@@ -18,28 +22,17 @@ void AEntity::BeginPlay()
 
 void AEntity::MergeBodyParts()
 {
-	// 병합에 필요한 파라미터를 구성합니다.
-	FSkeletalMeshMergeParams Params;
-	Params.bSkeletonBefore = false;
+	USkeletalMesh* MergedMesh = NewObject<USkeletalMesh>(GetTransientPackage(), NAME_None, RF_Transient);
 
-	// BodyMesh를 첫 번째 파라미터로 추가합니다.
-	if (IsValid(BodyMesh))
-	{
-		Params.MeshesToMerge.Add(BodyMesh);
-	}
+	TArray<FSkelMeshMergeSectionMapping> EmptySectionMappings;
+	FSkeletalMeshMerge Merger(MergedMesh, BodyParts, EmptySectionMappings, 0);
 
-	// 나머지 파츠들을 추가합니다.
-	for (USkeletalMesh* Part : BodyParts)
+	if (Merger.DoMerge())
 	{
-		if (IsValid(Part))
-		{
-			Params.MeshesToMerge.Add(Part);
-		}
+		// 병합 결과는 ClothMesh에 적용, Body(SKM_Body)는 건드리지 않음
+		ClothMesh->SetSkeletalMesh(MergedMesh);
+		
+		// SKM_Body의 포즈를 따라감
+		ClothMesh->SetLeaderPoseComponent(Body);
 	}
-	
-	// 메시를 병합하고 Body 컴포넌트에 적용합니다.
-	USkeletalMesh* MergedMesh = USkeletalMergingLibrary::MergeMeshes(Params);
-	Body->SetSkeletalMesh(MergedMesh);
-	
-	LOG(TEXT("메시 병합이 완료되었습니다. 파츠 수: %d"), Params.MeshesToMerge.Num());
 }
