@@ -88,16 +88,21 @@ bool AFlash::IsIrradiateEventZone()
 	Params.AddIgnoredActor(this); // 자기 자신 제외
 
 	GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_FLASH, Params);
-	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Yellow);
 
+	FColor Color;
+	
 	if (HitResult.GetActor())
 	{
 		LOG(TEXT("비추는 중"))
+		Color = FColor::Red;
 	}
 	else
 	{
 		LOG(TEXT("안 비추는 중"))
+		Color = FColor::Silver;
 	}
+	
+	DrawDebugLine(GetWorld(), StartLocation, EndLocation, Color);
 
 	return HitResult.GetActor() != nullptr;
 
