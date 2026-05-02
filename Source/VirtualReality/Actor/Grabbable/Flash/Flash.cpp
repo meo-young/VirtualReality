@@ -1,9 +1,14 @@
 #include "Flash.h"
+
+#include "VirtualReality.h"
 #include "Components/SpotLightComponent.h"
+#include "Define/Define.h"
 #include "Player/VRHand.h"
 
 AFlash::AFlash()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_Flash(TEXT("/Game/_VirtualReality/Mesh/Flash/SM_Flash"));
 	if (SM_Flash.Succeeded())
 	{
@@ -20,7 +25,14 @@ void AFlash::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	FlashLight->SetVisibility(false);
+	SetEnableLightVisibility(false);
+}
+
+void AFlash::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+	IsIrradiateEventZone();
 }
 
 void AFlash::DoGrab(USkeletalMeshComponent* InComponent)
@@ -52,10 +64,41 @@ void AFlash::DoRelease(USkeletalMeshComponent* InComponent)
 		}
 	}
 	
-	FlashLight->SetVisibility(false);
+	SetEnableLightVisibility(false);
 }
 
 void AFlash::Interact()
 {
-	FlashLight->SetVisibility(!FlashLight->IsVisible());
+	SetEnableLightVisibility(!FlashLight->IsVisible());
+}
+
+void AFlash::SetEnableLightVisibility(bool InEnableLightVisibility)
+{
+	FlashLight->SetVisibility(InEnableLightVisibility);
+	SetActorTickEnabled(InEnableLightVisibility);
+}
+
+bool AFlash::IsIrradiateEventZone()
+{
+	FHitResult HitResult;
+	const FVector StartLocation = FlashLight->GetComponentLocation(); // 메시 내부 대신 라이트 위치
+	const FVector EndLocation = StartLocation + 2000.f * FlashLight->GetForwardVector();
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this); // 자기 자신 제외
+
+	GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_FLASH, Params);
+	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Yellow);
+
+	if (HitResult.GetActor())
+	{
+		LOG(TEXT("비추는 중"))
+	}
+	else
+	{
+		LOG(TEXT("안 비추는 중"))
+	}
+
+	return HitResult.GetActor() != nullptr;
+
 }

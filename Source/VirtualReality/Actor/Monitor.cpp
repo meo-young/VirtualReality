@@ -6,6 +6,8 @@
 #include "EngineUtils.h"
 #include "VirtualReality.h"
 #include "Components/RectLightComponent.h"
+#include "Components/AudioComponent.h"
+#include "Subsystem/SoundSubsystem.h"
 
 AMonitor::AMonitor()
 {
@@ -72,10 +74,15 @@ void AMonitor::DeactivateAllCCTVs()
 void AMonitor::SwitchToNextCCTV()
 {
 	if (RegisteredCCTVs.IsEmpty() || bIsScanning) return;
-	
+
 	// 현재 CCTV의 캡쳐를 비활성화합니다.
 	SetActiveCCTV(false);
 	SetScreenMaterial(5.f, 0.1f, BlackRenderTarget);
+
+	if (USoundSubsystem* SoundSubsystem = GetWorld()->GetSubsystem<USoundSubsystem>())
+	{
+		SoundSubsystem->PlayAtLocation(ChannelSwitchSound, GetActorLocation());
+	}
 	
 	// 다음으로 활성화할 CCTV의 인덱스를 저장합니다.
 	ActiveCCTVIndex = (ActiveCCTVIndex + 1) % RegisteredCCTVs.Num();
@@ -99,6 +106,11 @@ void AMonitor::OnLeverReachedEnd()
 	bIsScanning = true;
 	ScreenMesh->SetMaterial(0, ScanningMaterial);
 
+	if (USoundSubsystem* SoundSubsystem = GetWorld()->GetSubsystem<USoundSubsystem>())
+	{
+		ScanningSoundComponent = SoundSubsystem->PlayAtLocation(ScanningSound, GetActorLocation());
+	}
+
 	// ScanningDuration 후 원래 머티리얼로 복원합니다.
 	GetWorldTimerManager().SetTimer(ScanningTimerHandle, this, &AMonitor::RestoreScreenMaterial, ScanningDuration, false);
 }
@@ -107,6 +119,12 @@ void AMonitor::RestoreScreenMaterial()
 {
 	bIsScanning = false;
 	ScreenMesh->SetMaterial(0, ScreenMaterialInstance);
+
+	if (USoundSubsystem* SoundSubsystem = GetWorld()->GetSubsystem<USoundSubsystem>())
+	{
+		SoundSubsystem->Stop(ScanningSoundComponent);
+		ScanningSoundComponent = nullptr;
+	}
 }
 
 void AMonitor::ApplyNextCCTV()
@@ -114,6 +132,11 @@ void AMonitor::ApplyNextCCTV()
 	// 다음 CCTV가 캡쳐하는 텍스처를 모니터에 적용합니다.
 	UTextureRenderTarget2D* RenderTarget = RegisteredCCTVs[ActiveCCTVIndex]->GetRenderTarget();
 	SetScreenMaterial(0.f, 0.f, RenderTarget);
+
+	if (USoundSubsystem* SoundSubsystem = GetWorld()->GetSubsystem<USoundSubsystem>())
+	{
+		SoundSubsystem->PlayAtLocation(CCTVNoiseSound, GetActorLocation());
+	}
 }
 
 void AMonitor::SetScreenMaterial(const float InNoisePower, const float InNoiseIntensity, UTextureRenderTarget2D* InRenderTarget)

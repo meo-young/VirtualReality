@@ -9,6 +9,8 @@ class URectLightComponent;
 class UStaticMeshComponent;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
+class USoundCue;
+class UAudioComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMonitorChangedDelegate, ACCTV*);
 
@@ -95,15 +97,32 @@ protected:
 	
 	/** 모니터에 출력할 CCTV 액터 목록입니다. 레벨에 배치된 CCTV 액터를 수동으로 등록해야 합니다.
 	 * 
-	 * 0 : Locker, 1 : Corridor, 2 : EmptyLot,  3 : Exit
+	 * 0 : Basement, 1 : Laundry, 2 : Living,  3 : Toilet
 	 */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "변수|CCTV")
 	TArray<TObjectPtr<ACCTV>> RegisteredCCTVs;
 
+	
+// Sound
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Sound")
+	TObjectPtr<USoundCue> ScanningSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Sound")
+	TObjectPtr<USoundCue> CCTVNoiseSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Sound")
+	TObjectPtr<USoundCue> ChannelSwitchSound;
+	
+	
+	
 private:
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> ScreenMaterialInstance;
-	
+
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> ScanningSoundComponent;
+
 	int32 ActiveCCTVIndex = 0;
 	FTimerHandle SwitchTimerHandle;
 	FTimerHandle ScanningTimerHandle;

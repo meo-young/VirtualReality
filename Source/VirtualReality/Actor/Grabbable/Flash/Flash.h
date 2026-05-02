@@ -17,6 +17,7 @@ class VIRTUALREALITY_API AFlash : public AVRGrabbableActor, public IInteractable
 public:
 	AFlash();
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 	
 	
 // IGrabbable Interface	
@@ -28,6 +29,12 @@ public:
 // IInteractable Interface	
 public:	
 	virtual void Interact() override;
+	
+
+// Member Function
+private:	
+	void SetEnableLightVisibility(bool InEnableLightVisibility);
+	bool IsIrradiateEventZone();
 	
 	
 // Component Section	
