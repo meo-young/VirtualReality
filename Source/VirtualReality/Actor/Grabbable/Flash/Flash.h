@@ -37,6 +37,10 @@ private:
 	bool IsIrradiateEventZone();
 	
 	
+public:
+	uint8 bIsIrradiateEventZone : 1 = false;
+	
+	
 // Component Section	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")

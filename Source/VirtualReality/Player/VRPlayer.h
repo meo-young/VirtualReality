@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "VRPlayer.generated.h"
 
+class ALevelSequenceActor;
 class UInputMappingContext;
 class UVRHandAnimInstance;
 class AVRHand;
@@ -21,6 +22,10 @@ public:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	
+public:
+	UFUNCTION(BlueprintCallable)
+	void OnDeath();
+	
 protected:
 	/** VR 트래킹 원점을 초기화하는 함수입니다. */
 	void InitVRSetting();
@@ -36,6 +41,12 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
 	TObjectPtr<UCameraComponent> CameraComponent;
+	
+
+// Sequence Section	
+public:
+	UPROPERTY(EditAnywhere, Category = "변수|시퀀스")
+	TObjectPtr<ALevelSequenceActor> DeathSequence;
 	
 	
 // Hand Class Section	

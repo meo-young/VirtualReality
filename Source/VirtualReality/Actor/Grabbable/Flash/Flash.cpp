@@ -1,6 +1,7 @@
 #include "Flash.h"
 
 #include "VirtualReality.h"
+#include "Actor/EventZone.h"
 #include "Components/SpotLightComponent.h"
 #include "Define/Define.h"
 #include "Player/VRHand.h"
@@ -93,16 +94,21 @@ bool AFlash::IsIrradiateEventZone()
 	
 	if (HitResult.GetActor())
 	{
-		LOG(TEXT("비추는 중"))
+		bIsIrradiateEventZone = true;
 		Color = FColor::Red;
+
+		if (AEventZone* EventZone = Cast<AEventZone>(HitResult.GetActor()))
+		{
+			//EventZone->StopSequence();
+		}
 	}
 	else
 	{
-		LOG(TEXT("안 비추는 중"))
+		bIsIrradiateEventZone = false;
 		Color = FColor::Silver;
 	}
 	
-	DrawDebugLine(GetWorld(), StartLocation, EndLocation, Color);
+	//DrawDebugLine(GetWorld(), StartLocation, EndLocation, Color);
 
 	return HitResult.GetActor() != nullptr;
 

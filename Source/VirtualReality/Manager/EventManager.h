@@ -51,7 +51,7 @@ public:
 private:
 	void PlayNextEvent();
 
-	/** 랜덤 인터벌로 다음 이벤트 타이머를 예약하고, 설정된 인터벌(초)을 반환합니다. */
+	/** 랜덤 인터벌로 다음 이벤트 타이머를 예약합니다. */
 	void ScheduleNextEvent();
 
 	/** 감시 중인 구역에 발생한 이벤트가 없을 때 처리합니다. */
@@ -59,7 +59,7 @@ private:
 
 	/** 감시 중인 구역에서 재생된 이벤트의 장소 상태를 복원합니다. */
 	void RestoreWatchedZoneState();
-	
+
 	/** 현재가 Entity 이벤트를 출력할 턴인지 여부를 반환하는 함수입니다. */
 	uint8 IsEntityTurn();
 
@@ -72,6 +72,9 @@ private:
 	/** 선정된 구역에 Normal 이벤트를 출력합니다. */
 	void PlayNormalEvent(ACCTV* SelectedCCTV);
 
+	/** 플레이어 사망 처리를 수행합니다. */
+	void PlayerDeath();
+
 
 // Variable Section
 protected:
@@ -81,11 +84,11 @@ protected:
 
 	/** 다음 이벤트까지 대기 시간의 최솟값(초)입니다. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|이벤트")
-	float MinEventInterval = 3.0f;
+	float MinEventInterval = 30.0f;
 
 	/** 다음 이벤트까지 대기 시간의 최댓값(초)입니다. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|이벤트")
-	float MaxEventInterval = 8.0f;
+	float MaxEventInterval = 50.0f;
 
 	/** Entity 이벤트 발생까지 필요한 최소 이벤트 횟수입니다. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|이벤트")
@@ -95,8 +98,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|이벤트")
 	int32 MaxEntityEventCycle = 6;
 
+	/** Entity 이벤트 미스캔 시 사망까지의 제한 시간(초)입니다. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|사망")
+	float EntityEventDeathTimeout = 30.0f;
+
 private:
 	FTimerHandle EventTimerHandle;
+	FTimerHandle EntityEventDeathTimerHandle;
+
+	/** 스캔되지 않은 NormalEvent의 누적 개수입니다. */
+	int32 UnscannedNormalEventCount = 0;
 
 	/** 총 이벤트 재생 횟수를 추적합니다. */
 	int32 EventCallCount = 0;

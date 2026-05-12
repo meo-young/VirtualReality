@@ -8,6 +8,7 @@
 class AMonitor;
 class UTextRenderComponent;
 class USpotLightComponent;
+class USoundCue;
 
 UCLASS()
 class VIRTUALREALITY_API AChannelSwitchButton : public ATriggerableActor, public ISequenceable
@@ -44,6 +45,12 @@ protected:
 	TObjectPtr<USpotLightComponent> ButtonLight;
 	
 	
+// Sound Section
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Sound")
+	TObjectPtr<USoundCue> ButtonSound;
+
+
 // Variable Section
 private:
 	FTimerHandle ChannelSwitchTimerHandle;

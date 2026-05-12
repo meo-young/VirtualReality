@@ -7,7 +7,8 @@
 #include "VirtualReality.h"
 #include "Components/RectLightComponent.h"
 #include "Components/AudioComponent.h"
-#include "Subsystem/SoundSubsystem.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 AMonitor::AMonitor()
 {
@@ -48,6 +49,8 @@ void AMonitor::BeginPlay()
 	}
 	
 	ScreenRectLight->SetVisibility(true);
+
+	StartCCTVNoise();
 }
 
 void AMonitor::SetActiveCCTV(bool bIsEnable)
@@ -79,10 +82,7 @@ void AMonitor::SwitchToNextCCTV()
 	SetActiveCCTV(false);
 	SetScreenMaterial(5.f, 0.1f, BlackRenderTarget);
 
-	if (USoundSubsystem* SoundSubsystem = GetWorld()->GetSubsystem<USoundSubsystem>())
-	{
-		SoundSubsystem->PlayAtLocation(ChannelSwitchSound, GetActorLocation());
-	}
+	ChannelSwitchSoundComponent = UGameplayStatics::SpawnSoundAtLocation(this, ChannelSwitchSound, GetActorLocation());
 	
 	// 다음으로 활성화할 CCTV의 인덱스를 저장합니다.
 	ActiveCCTVIndex = (ActiveCCTVIndex + 1) % RegisteredCCTVs.Num();
@@ -106,10 +106,7 @@ void AMonitor::OnLeverReachedEnd()
 	bIsScanning = true;
 	ScreenMesh->SetMaterial(0, ScanningMaterial);
 
-	if (USoundSubsystem* SoundSubsystem = GetWorld()->GetSubsystem<USoundSubsystem>())
-	{
-		ScanningSoundComponent = SoundSubsystem->PlayAtLocation(ScanningSound, GetActorLocation());
-	}
+	ScanningSoundComponent = UGameplayStatics::SpawnSoundAtLocation(this, ScanningSound, GetActorLocation());
 
 	// ScanningDuration 후 원래 머티리얼로 복원합니다.
 	GetWorldTimerManager().SetTimer(ScanningTimerHandle, this, &AMonitor::RestoreScreenMaterial, ScanningDuration, false);
@@ -120,9 +117,9 @@ void AMonitor::RestoreScreenMaterial()
 	bIsScanning = false;
 	ScreenMesh->SetMaterial(0, ScreenMaterialInstance);
 
-	if (USoundSubsystem* SoundSubsystem = GetWorld()->GetSubsystem<USoundSubsystem>())
+	if (ScanningSoundComponent)
 	{
-		SoundSubsystem->Stop(ScanningSoundComponent);
+		ScanningSoundComponent->Stop();
 		ScanningSoundComponent = nullptr;
 	}
 }
@@ -133,10 +130,16 @@ void AMonitor::ApplyNextCCTV()
 	UTextureRenderTarget2D* RenderTarget = RegisteredCCTVs[ActiveCCTVIndex]->GetRenderTarget();
 	SetScreenMaterial(0.f, 0.f, RenderTarget);
 
-	if (USoundSubsystem* SoundSubsystem = GetWorld()->GetSubsystem<USoundSubsystem>())
+	if (ChannelSwitchSoundComponent)
 	{
-		SoundSubsystem->PlayAtLocation(CCTVNoiseSound, GetActorLocation());
+		ChannelSwitchSoundComponent->Stop();
+		ChannelSwitchSoundComponent = nullptr;
 	}
+}
+
+void AMonitor::StartCCTVNoise()
+{
+	CCTVNoiseSoundComponent = UGameplayStatics::SpawnSoundAttached(CCTVNoiseSound, MonitorMesh);
 }
 
 void AMonitor::SetScreenMaterial(const float InNoisePower, const float InNoiseIntensity, UTextureRenderTarget2D* InRenderTarget)

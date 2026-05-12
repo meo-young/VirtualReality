@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Path \"D:\\\\Unreal_Project\\\\VirtualReality\\\\Source\" -Recurse -File)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "Bash(Remove-Item \"D:\\\\Unreal_Project\\\\VirtualReality\\\\Source\\\\VirtualReality\\\\Subsystem\\\\SoundSubsystem.h\" -Force)",
+      "Bash(Remove-Item \"D:\\\\Unreal_Project\\\\VirtualReality\\\\Source\\\\VirtualReality\\\\Subsystem\\\\SoundSubsystem.cpp\" -Force)",
+      "Bash(Write-Output \"삭제 완료\")"
     ]
   }
 }

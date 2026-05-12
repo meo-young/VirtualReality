@@ -1,6 +1,8 @@
 #include "EventManager.h"
 #include "LevelSequencePlayer.h"
 #include "VirtualReality.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 void AEventManager::BeginPlay()
 {
@@ -57,7 +59,7 @@ void AEventManager::PlayEntityEvent(ACCTV* SelectedCCTV)
 	// 선정된 구역의 랜덤한 Entity 이벤트를 선택합니다.
 	FEventInfo& Zone = ZoneEvents[SelectedCCTV];
 	const int32 EventIndex = FMath::RandRange(0, Zone.EntityEvents.Num() - 1);
-	
+
 	// 이벤트 출력 가중치를 더하고, PlayedEventsByZone에 이벤트 정보를 저장한 후 해당 이벤트를 출력 후 원본 배열에서 제거합니다.
 	PlayedEventsByZone.Add(SelectedCCTV, Zone.EntityEvents[EventIndex]);
 	Zone.EntityEvents[EventIndex]->GetSequencePlayer()->Play();
@@ -67,6 +69,9 @@ void AEventManager::PlayEntityEvent(ACCTV* SelectedCCTV)
 	// Entity 이벤트 활성 구역을 기록하고 다음 Entity 기준값을 갱신합니다.
 	EntityEventActiveCCTV = SelectedCCTV;
 	NextEntityEventThreshold = ++EventCallCount + FMath::RandRange(MinEntityEventCycle, MaxEntityEventCycle);
+
+	// Entity 이벤트 미스캔 사망 타이머를 시작합니다.
+	GetWorldTimerManager().SetTimer(EntityEventDeathTimerHandle, this, &ThisClass::PlayerDeath, EntityEventDeathTimeout, false);
 
 	LOG(TEXT("Entity 이벤트 %d를 재생합니다. (잔여: %d개)"), EventIndex, Zone.EntityEvents.Num());
 	ScheduleNextEvent();
@@ -86,9 +91,15 @@ void AEventManager::PlayNormalEvent(ACCTV* SelectedCCTV)
 
 	// 이벤트 총 출력 횟수를 더합니다.
 	++EventCallCount;
+	++UnscannedNormalEventCount;
 
-	LOG(TEXT("Normal 이벤트 %d를 재생합니다. (잔여: %d개)"), EventIndex, Zone.NormalEvents.Num());
+	LOG(TEXT("Normal 이벤트 %d를 재생합니다. (잔여: %d개, 미스캔: %d개)"), EventIndex, Zone.NormalEvents.Num(), UnscannedNormalEventCount);
 	ScheduleNextEvent();
+
+	if (UnscannedNormalEventCount >= 3)
+	{
+		PlayerDeath();
+	}
 }
 
 void AEventManager::OnLeverReachedEnd()
@@ -123,15 +134,21 @@ void AEventManager::RestoreWatchedZoneState()
 		}
 	}
 
-	// 이 구역에 Entity 이벤트가 있었다면 활성 상태를 해제합니다.
+	// 이 구역에 Entity 이벤트가 있었다면 활성 상태를 해제하고 사망 타이머를 취소합니다.
 	if (EntityEventActiveCCTV == WatchedCCTV)
 	{
 		EntityEventActiveCCTV = nullptr;
+		GetWorldTimerManager().ClearTimer(EntityEventDeathTimerHandle);
+	}
+	else
+	{
+		// NormalEvent였으므로 미스캔 카운트를 감소합니다.
+		--UnscannedNormalEventCount;
 	}
 
 	PlayedEventsByZone.Remove(WatchedCCTV);
 
-	LOG(TEXT("감시 중인 구역의 이벤트 장소 상태가 복원되었습니다."));
+	LOG(TEXT("감시 중인 구역의 이벤트 장소 상태가 복원되었습니다. (미스캔 Normal: %d개)"), UnscannedNormalEventCount);
 }
 
 uint8 AEventManager::IsEntityTurn()
@@ -143,6 +160,14 @@ void AEventManager::OnMonitorChanged(ACCTV* InWatchedCCTV)
 {
 	// 현재 감시 중인 CCTV를 캐싱합니다.
 	WatchedCCTV = InWatchedCCTV;
+}
+
+void AEventManager::PlayerDeath()
+{
+	StopEventCycle();
+	GetWorldTimerManager().ClearTimer(EntityEventDeathTimerHandle);
+
+	UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0), EQuitPreference::Quit, false);
 }
 
 ACCTV* AEventManager::PickEventZone()

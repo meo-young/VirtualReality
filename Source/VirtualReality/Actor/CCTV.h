@@ -17,15 +17,11 @@ class VIRTUALREALITY_API ACCTV : public AActor
 public:
 	ACCTV();
 	virtual void BeginPlay() override;
-
 	
-// Member Function	
+// Member Function
 public:
 	/** SceneCaptureComponent의 캡처 활성화 여부를 설정합니다. */
 	void SetCaptureEnabled(bool bEnabled);
-
-private:
-	void CaptureScene();
 	
 	
 // Component Section	
@@ -39,13 +35,6 @@ protected:
 	TObjectPtr<USceneCaptureComponent2D> SceneCaptureComponent;
 	
 	
-// Variable Section
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|수치")
-	float CaptureInterval = 1.0f;
-
-private:
-	FTimerHandle CaptureTimerHandle;
 
 	
 // Getter, Setter Section

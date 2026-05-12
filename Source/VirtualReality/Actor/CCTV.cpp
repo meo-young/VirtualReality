@@ -36,32 +36,11 @@ void ACCTV::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	CaptureScene();
+	SceneCaptureComponent->CaptureScene();
 }
 
 void ACCTV::SetCaptureEnabled(bool bEnabled)
 {
+	SceneCaptureComponent->bCaptureEveryFrame = bEnabled;
 	SceneCaptureComponent->SetActive(bEnabled);
-
-	if (bEnabled)
-	{
-		GetWorldTimerManager().SetTimer(
-			CaptureTimerHandle,
-			this,
-			&ThisClass::CaptureScene,
-			CaptureInterval,
-			true,
-			false
-		);
-	}
-	else
-	{
-		GetWorldTimerManager().ClearTimer(CaptureTimerHandle);
-	}
-}
-
-void ACCTV::CaptureScene()
-{
-	// 씬을 수동으로 캡처합니다.
-	SceneCaptureComponent->CaptureScene();
 }

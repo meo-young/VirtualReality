@@ -4,6 +4,10 @@
 #include "Abstract/BaseGameMode.h"
 #include "MainGameMode.generated.h"
 
+class ACCTV;
+class AEventManager;
+class AEventZone;
+
 UCLASS()
 class VIRTUALREALITY_API AMainGameMode : public ABaseGameMode
 {
@@ -11,4 +15,18 @@ class VIRTUALREALITY_API AMainGameMode : public ABaseGameMode
 
 public:
 	virtual void BeginPlay() override;
+
+	void StartEvent();
+	void StopEvent();
+
+private:
+	void OnMonitorChanged(ACCTV* InCCTV);
+
+	uint8 bEventStarted : 1;
+
+	UPROPERTY()
+	TObjectPtr<AEventManager> CachedEventManager;
+
+	UPROPERTY()
+	TArray<TObjectPtr<AEventZone>> CachedEventZones;
 };

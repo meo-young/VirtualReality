@@ -44,6 +44,7 @@ private:
 	void ApplyNextCCTV();
 	void SetScreenMaterial(const float InNoisePower, const float InNoiseIntensity, UTextureRenderTarget2D* InRenderTarget);
 	void RestoreScreenMaterial();
+	void StartCCTVNoise();
 
 	
 // Component Section	
@@ -119,6 +120,12 @@ protected:
 private:
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> ScreenMaterialInstance;
+
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> CCTVNoiseSoundComponent;
+
+	UPROPERTY()
+	TObjectPtr<UAudioComponent> ChannelSwitchSoundComponent;
 
 	UPROPERTY()
 	TObjectPtr<UAudioComponent> ScanningSoundComponent;

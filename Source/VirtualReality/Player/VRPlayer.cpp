@@ -3,6 +3,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
+#include "LevelSequenceActor.h"
+#include "LevelSequencePlayer.h"
 #include "VirtualReality.h"
 #include "VRHand.h"
 #include "Animation/VRHandAnimInstance.h"
@@ -78,6 +80,13 @@ void AVRPlayer::BeginPlay()
 	
 	//InitVRSetting();
 	SpawnVRHands();
+}
+
+void AVRPlayer::OnDeath()
+{
+	SetActorRotation(FRotator(0.0f, -90.0f, 0.0f));
+	bUseControllerRotationYaw = false;
+	DeathSequence->GetSequencePlayer()->Play();
 }
 
 void AVRPlayer::InitVRSetting()

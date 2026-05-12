@@ -5,6 +5,7 @@
 #include "Components/SpotLightComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 AChannelSwitchButton::AChannelSwitchButton()
 {
@@ -50,7 +51,8 @@ void AChannelSwitchButton::BeginPlay()
 void AChannelSwitchButton::OnTriggered()
 {
 	Super::OnTriggered();
-	
+
+	UGameplayStatics::PlaySoundAtLocation(this, ButtonSound, GetActorLocation());
 	GetWorldTimerManager().SetTimer(ChannelSwitchTimerHandle, this, &ThisClass::SwitchChannel, 0.2f, false);
 	PlaySequence();
 }
