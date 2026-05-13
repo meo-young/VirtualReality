@@ -99,7 +99,7 @@ bool AFlash::IsIrradiateEventZone()
 
 		if (AEventZone* EventZone = Cast<AEventZone>(HitResult.GetActor()))
 		{
-			//EventZone->StopSequence();
+			EventZone->OnFlashHit();
 		}
 	}
 	else

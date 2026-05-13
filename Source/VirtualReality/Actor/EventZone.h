@@ -24,8 +24,13 @@ public:
 	void StopEventCycle();
 	void StopSequence();
 
+	/** Flash가 이 구역을 감지했을 때 호출됩니다. */
+	void OnFlashHit();
+
 protected:
 	void StartEvent();
+	bool CanStartEvent() const;
+	bool IsPlayerLookingAtZone() const;
 
 	UFUNCTION()
 	void OnSequenceEnded();
@@ -41,11 +46,20 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "변수|시퀀스")
 	float MaxEventInterval = 90.0f;
+
+	/** 플레이어 시선이 이 각도 이내에 들어오면 이벤트를 시작하지 않습니다. */
+	UPROPERTY(EditDefaultsOnly, Category = "변수|시퀀스")
+	float PlayerLookAtAngleThreshold = 45.0f;
+
+	/** 플레이어가 바라보는 상태에서 Flash 감지 시 Stop까지 대기 시간(초)입니다. */
+	UPROPERTY(EditDefaultsOnly, Category = "변수|시퀀스")
+	float FlashStopDelay = 2.0f;
 	
 	
-// Timer	
+// Timer
 private:
 	FTimerHandle EventTimerHandle;
+	FTimerHandle FlashStopTimerHandle;
 	
 
 };

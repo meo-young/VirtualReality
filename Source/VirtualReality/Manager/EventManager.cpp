@@ -3,6 +3,7 @@
 #include "VirtualReality.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Player/VRPlayer.h"
 
 void AEventManager::BeginPlay()
 {
@@ -167,7 +168,10 @@ void AEventManager::PlayerDeath()
 	StopEventCycle();
 	GetWorldTimerManager().ClearTimer(EntityEventDeathTimerHandle);
 
-	UKismetSystemLibrary::QuitGame(GetWorld(), UGameplayStatics::GetPlayerController(GetWorld(), 0), EQuitPreference::Quit, false);
+	if (AVRPlayer* Player = Cast<AVRPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	{
+		Player->OnDeath();
+	}
 }
 
 ACCTV* AEventManager::PickEventZone()

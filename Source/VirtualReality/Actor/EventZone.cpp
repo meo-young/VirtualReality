@@ -1,5 +1,4 @@
 #include "EventZone.h"
-
 #include "LevelSequenceActor.h"
 #include "LevelSequencePlayer.h"
 #include "Components/ShapeComponent.h"
@@ -25,7 +24,6 @@ void AEventZone::BeginPlay()
 			Player->OnFinished.AddDynamic(this, &ThisClass::OnSequenceEnded);
 		}
 	}
-
 }
 
 void AEventZone::StartEventCycle()
@@ -52,20 +50,57 @@ void AEventZone::StopSequence()
 
 void AEventZone::StartEvent()
 {
-	if (AFlash* Flash = Cast<AFlash>(UGameplayStatics::GetActorOfClass(GetWorld(), AFlash::StaticClass())))
+	if (CanStartEvent() && EventSequence)
 	{
-		//if (!Flash->bIsIrradiateEventZone)
-		{
-			if (EventSequence)
-			{
-				EventSequence->GetSequencePlayer()->Play();
-			}
-		}
+		EventSequence->GetSequencePlayer()->Play();
 	}
-	
+
 	GEngine->AddOnScreenDebugMessage(0, 5.0f, FColor::Yellow, "StartEvent");
-	
+
 	GetWorldTimerManager().SetTimer(EventTimerHandle, this, &ThisClass::StartEvent, FMath::FRandRange(MinEventInterval, MaxEventInterval), false);
+}
+
+bool AEventZone::CanStartEvent() const
+{
+	AFlash* Flash = Cast<AFlash>(UGameplayStatics::GetActorOfClass(GetWorld(), AFlash::StaticClass()));
+	if (Flash && Flash->bIsIrradiateEventZone) return false;
+
+	if (IsPlayerLookingAtZone()) return false;
+
+	return true;
+}
+
+bool AEventZone::IsPlayerLookingAtZone() const
+{
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!PC) return false;
+
+	FVector ViewLocation;
+	FRotator ViewRotation;
+	PC->GetPlayerViewPoint(ViewLocation, ViewRotation);
+
+	const FVector ToZone = (GetActorLocation() - ViewLocation).GetSafeNormal();
+	const float DotProduct = FVector::DotProduct(ViewRotation.Vector(), ToZone);
+	const float ThresholdCos = FMath::Cos(FMath::DegreesToRadians(PlayerLookAtAngleThreshold));
+
+	return DotProduct >= ThresholdCos;
+}
+
+void AEventZone::OnFlashHit()
+{
+	if (!EventSequence) return;
+
+	ULevelSequencePlayer* Player = EventSequence->GetSequencePlayer();
+	if (!Player || !Player->IsPlaying()) return;
+
+	// 이미 Stop 예약 중이면 중복 처리하지 않습니다.
+	if (GetWorldTimerManager().IsTimerActive(FlashStopTimerHandle)) return;
+
+	// 플레이어가 이 구역을 바라보고 있을 때만 Pause → 지연 Stop
+	if (!IsPlayerLookingAtZone()) return;
+
+	Player->Pause();
+	GetWorldTimerManager().SetTimer(FlashStopTimerHandle, this, &ThisClass::StopSequence, FlashStopDelay, false);
 }
 
 void AEventZone::OnSequenceEnded()
