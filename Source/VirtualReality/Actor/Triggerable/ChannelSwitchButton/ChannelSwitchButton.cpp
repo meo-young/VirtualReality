@@ -1,11 +1,12 @@
 #include "ChannelSwitchButton.h"
 #include "VirtualReality.h"
+#include "Actor/Clock.h"
 #include "Actor/Monitor.h"
 #include "Components/BoxComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Sound/SoundCue.h"
+#include "Subsystem/SoundSubsystem.h"
 
 AChannelSwitchButton::AChannelSwitchButton()
 {
@@ -44,17 +45,25 @@ AChannelSwitchButton::AChannelSwitchButton()
 void AChannelSwitchButton::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	Monitor = Cast<AMonitor>(UGameplayStatics::GetActorOfClass(GetWorld(), AMonitor::StaticClass()));
+	Clock = Cast<AClock>(UGameplayStatics::GetActorOfClass(GetWorld(), AClock::StaticClass()));
 }
 
 void AChannelSwitchButton::OnTriggered()
 {
 	Super::OnTriggered();
 
-	UGameplayStatics::PlaySoundAtLocation(this, ButtonSound, GetActorLocation());
+	USoundSubsystem::Get(this).PlaySFXAtLocationByName(TEXT("Button"), GetActorLocation());
 	GetWorldTimerManager().SetTimer(ChannelSwitchTimerHandle, this, &ThisClass::SwitchChannel, 0.2f, false);
 	PlaySequence();
+
+	// 첫 트리거 시점에 Clock을 가동합니다.
+	if (!bIsClockStarted && Clock)
+	{
+		bIsClockStarted = true;
+		Clock->ActivateTimer();
+	}
 }
 
 void AChannelSwitchButton::SwitchChannel()

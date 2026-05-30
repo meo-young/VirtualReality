@@ -4,8 +4,6 @@
 #include "Actor/Grabbable/VRGrabbableActor.h"
 #include "LeverBase.generated.h"
 
-class USoundCue;
-
 /** 레버를 당기는 기준 축을 나타내는 열거형입니다. */
 UENUM(BlueprintType)
 enum class ELeverAxis : uint8
@@ -99,11 +97,5 @@ protected:
 
 	uint8 bReachedEndAngle : 1 = false;
 	uint8 bIsReturning : 1 = false;
-
-
-// Sound Section
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Sound")
-	TObjectPtr<USoundCue> LeverSound;
 
 };

@@ -8,7 +8,8 @@
 #include "Components/RectLightComponent.h"
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Sound/SoundCue.h"
+#include "Player/VRPlayer.h"
+#include "Subsystem/SoundSubsystem.h"
 
 AMonitor::AMonitor()
 {
@@ -47,7 +48,7 @@ void AMonitor::BeginPlay()
 		ScreenMaterialInstance = UMaterialInstanceDynamic::Create(ScreenMaterial, this);
 		ScreenMesh->SetMaterial(0, ScreenMaterialInstance);
 	}
-	
+
 	ScreenRectLight->SetVisibility(true);
 
 	StartCCTVNoise();
@@ -82,7 +83,7 @@ void AMonitor::SwitchToNextCCTV()
 	SetActiveCCTV(false);
 	SetScreenMaterial(5.f, 0.1f, BlackRenderTarget);
 
-	ChannelSwitchSoundComponent = UGameplayStatics::SpawnSoundAtLocation(this, ChannelSwitchSound, GetActorLocation());
+	ChannelSwitchSoundComponent = USoundSubsystem::Get(this).PlaySFXAtLocationByName(TEXT("ChannelSwitch"), GetActorLocation());
 	
 	// 다음으로 활성화할 CCTV의 인덱스를 저장합니다.
 	ActiveCCTVIndex = (ActiveCCTVIndex + 1) % RegisteredCCTVs.Num();
@@ -106,7 +107,7 @@ void AMonitor::OnLeverReachedEnd()
 	bIsScanning = true;
 	ScreenMesh->SetMaterial(0, ScanningMaterial);
 
-	ScanningSoundComponent = UGameplayStatics::SpawnSoundAtLocation(this, ScanningSound, GetActorLocation());
+	ScanningSoundComponent = USoundSubsystem::Get(this).PlaySFXAtLocationByName(TEXT("Scanning"), GetActorLocation());
 
 	// ScanningDuration 후 원래 머티리얼로 복원합니다.
 	GetWorldTimerManager().SetTimer(ScanningTimerHandle, this, &AMonitor::RestoreScreenMaterial, ScanningDuration, false);
@@ -139,7 +140,45 @@ void AMonitor::ApplyNextCCTV()
 
 void AMonitor::StartCCTVNoise()
 {
-	CCTVNoiseSoundComponent = UGameplayStatics::SpawnSoundAttached(CCTVNoiseSound, MonitorMesh);
+	CCTVNoiseSoundComponent = USoundSubsystem::Get(this).PlaySFXAtLocationByName(TEXT("CCTVNoise"), MonitorMesh->GetComponentLocation());
+}
+
+void AMonitor::HandlePlayerDeath()
+{
+	if (ChannelSwitchSoundComponent)
+	{
+		ChannelSwitchSoundComponent->Stop();
+		ChannelSwitchSoundComponent = nullptr;
+	}
+
+	if (ScanningSoundComponent)
+	{
+		ScanningSoundComponent->Stop();
+		ScanningSoundComponent = nullptr;
+	}
+
+	if (CCTVNoiseSoundComponent)
+	{
+		CCTVNoiseSoundComponent->Stop();
+		CCTVNoiseSoundComponent = nullptr;
+	}
+
+	// 진행 중인 채널 전환/스캐닝 타이머를 정지하여 노이즈 화면이 다른 상태로 복원되지 않도록 합니다.
+	GetWorldTimerManager().ClearTimer(SwitchTimerHandle);
+	GetWorldTimerManager().ClearTimer(ScanningTimerHandle);
+
+	// 모든 CCTV 캡쳐를 중단합니다.
+	DeactivateAllCCTVs();
+
+	// 스캐닝 머티리얼이 적용되어 있을 수 있으므로 다이나믹 머티리얼로 되돌립니다.
+	bIsScanning = false;
+	if (ScreenMaterialInstance)
+	{
+		ScreenMesh->SetMaterial(0, ScreenMaterialInstance);
+	}
+
+	// 화면을 노이즈 상태로 고정합니다.
+	SetScreenMaterial(5.f, 0.1f, BlackRenderTarget);
 }
 
 void AMonitor::SetScreenMaterial(const float InNoisePower, const float InNoiseIntensity, UTextureRenderTarget2D* InRenderTarget)

@@ -100,6 +100,28 @@ void AVRHand::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	}
 }
 
+void AVRHand::FreezeMotionController()
+{
+	if (MotionController)
+	{
+		MotionController->SetComponentTickEnabled(false);
+	}
+
+	// 손 메시의 물리 시뮬레이션을 중지하고 보이지 않도록 숨깁니다.
+	if (HandMesh)
+	{
+		HandMesh->SetSimulatePhysics(false);
+		HandMesh->SetVisibility(false, true);
+	}
+
+	if (VirtualHandMesh)
+	{
+		VirtualHandMesh->SetVisibility(false, true);
+	}
+
+	SetActorTickEnabled(false);
+}
+
 void AVRHand::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);

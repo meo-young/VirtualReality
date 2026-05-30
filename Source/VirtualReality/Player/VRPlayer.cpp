@@ -84,9 +84,32 @@ void AVRPlayer::BeginPlay()
 
 void AVRPlayer::OnDeath()
 {
-	SetActorRotation(FRotator(0.0f, -90.0f, 0.0f));
+	/*SetActorRotation(FRotator(0.0f, -90.0f, 0.0f));
 	bUseControllerRotationYaw = false;
+
+	// HMD 동기화를 끊기 직전에 카메라를 액터 정면으로 회전 고정합니다.
+	if (CameraComponent)
+	{
+		CameraComponent->SetRelativeRotation(FRotator::ZeroRotator);
+		CameraComponent->bLockToHmd = false;
+	}*/
+
+	// 손 컨트롤러 추적을 중지합니다.
+	if (LeftHand)
+	{
+		LeftHand->FreezeMotionController();
+	}
+	if (RightHand)
+	{
+		RightHand->FreezeMotionController();
+	}
+
 	DeathSequence->GetSequencePlayer()->Play();
+
+	if (OnPlayerDeathDelegate.IsBound())
+	{
+		OnPlayerDeathDelegate.Broadcast();
+	}
 }
 
 void AVRPlayer::InitVRSetting()

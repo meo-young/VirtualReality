@@ -9,7 +9,6 @@ class URectLightComponent;
 class UStaticMeshComponent;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
-class USoundCue;
 class UAudioComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMonitorChangedDelegate, ACCTV*);
@@ -37,6 +36,9 @@ public:
 	void SwitchToNextCCTV();
 	
 	void OnLeverReachedEnd();
+	
+	UFUNCTION(BlueprintCallable)
+	void HandlePlayerDeath();
 
 private:
 	void SetActiveCCTV(bool bIsEnable);
@@ -103,20 +105,7 @@ protected:
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "변수|CCTV")
 	TArray<TObjectPtr<ACCTV>> RegisteredCCTVs;
 
-	
-// Sound
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Sound")
-	TObjectPtr<USoundCue> ScanningSound;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Sound")
-	TObjectPtr<USoundCue> CCTVNoiseSound;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Sound")
-	TObjectPtr<USoundCue> ChannelSwitchSound;
-	
-	
-	
 private:
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> ScreenMaterialInstance;

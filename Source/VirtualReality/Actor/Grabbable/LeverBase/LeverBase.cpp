@@ -2,8 +2,7 @@
 #include "VirtualReality.h"
 #include "Component/VRHapticComponent.h"
 #include "Player/VRHand.h"
-#include "Kismet/GameplayStatics.h"
-#include "Sound/SoundCue.h"
+#include "Subsystem/SoundSubsystem.h"
 
 ALeverBase::ALeverBase()
 {
@@ -142,10 +141,7 @@ void ALeverBase::UpdateLeverAngle(float DeltaTime)
 		CachedHand->GetHapticComponent()->PlayHapticBurst(BurstHapticScale, BurstHapticDuration);
 		CachedHand->ReleaseObject();
 
-		if (LeverSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(this, LeverSound, GetActorLocation());
-		}
+		USoundSubsystem::Get(this).PlaySFXAtLocationByName(TEXT("Lever"), GetActorLocation());
 
 		if (OnLeverReachedEndDelegate.IsBound())
 		{

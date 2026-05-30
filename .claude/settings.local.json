@@ -5,7 +5,8 @@
       "Bash(Select-Object FullName)",
       "Bash(Remove-Item \"D:\\\\Unreal_Project\\\\VirtualReality\\\\Source\\\\VirtualReality\\\\Subsystem\\\\SoundSubsystem.h\" -Force)",
       "Bash(Remove-Item \"D:\\\\Unreal_Project\\\\VirtualReality\\\\Source\\\\VirtualReality\\\\Subsystem\\\\SoundSubsystem.cpp\" -Force)",
-      "Bash(Write-Output \"삭제 완료\")"
+      "Bash(Write-Output \"삭제 완료\")",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }

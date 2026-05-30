@@ -6,9 +6,9 @@
 #include "ChannelSwitchButton.generated.h"
 
 class AMonitor;
+class AClock;
 class UTextRenderComponent;
 class USpotLightComponent;
-class USoundCue;
 
 UCLASS()
 class VIRTUALREALITY_API AChannelSwitchButton : public ATriggerableActor, public ISequenceable
@@ -43,22 +43,22 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|컴포넌트")
 	TObjectPtr<USpotLightComponent> ButtonLight;
-	
-	
-// Sound Section
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|Sound")
-	TObjectPtr<USoundCue> ButtonSound;
 
 
 // Variable Section
 private:
 	FTimerHandle ChannelSwitchTimerHandle;
-	
-	
-// Cached Section	
+
+	/** 첫 트리거 여부를 표시합니다. true면 이미 Clock이 시작됨을 의미합니다. */
+	uint8 bIsClockStarted : 1 = false;
+
+
+// Cached Section
 private:
 	UPROPERTY()
 	TObjectPtr<AMonitor> Monitor;
+
+	UPROPERTY()
+	TObjectPtr<AClock> Clock;
 
 };

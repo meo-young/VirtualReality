@@ -30,6 +30,9 @@ public:
 	
 public:
 	void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent);
+
+	/** 모션 컨트롤러의 추적 업데이트를 중지하여 손을 현재 위치에 고정합니다. */
+	void FreezeMotionController();
 	
 	
 // Action Binding Function Section		

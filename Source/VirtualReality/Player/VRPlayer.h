@@ -10,21 +10,28 @@ class UVRHandAnimInstance;
 class AVRHand;
 class UCameraComponent;
 
+DECLARE_MULTICAST_DELEGATE(FOnPlayerDeathDelegate);
+
 UCLASS()
 class VIRTUALREALITY_API AVRPlayer : public ACharacter
 {
 	GENERATED_BODY()
-	
+
 public:
 	AVRPlayer();
 	virtual void NotifyControllerChanged() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
-	
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void OnDeath();
+
+
+// Delegate Section
+public:
+	FOnPlayerDeathDelegate OnPlayerDeathDelegate;
 	
 protected:
 	/** VR 트래킹 원점을 초기화하는 함수입니다. */
