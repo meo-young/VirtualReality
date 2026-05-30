@@ -29,13 +29,20 @@ void USoundSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
 
+    // Config에 지정된 에셋들을 동기 로드하여 강한 참조로 캐시합니다.
+    MasterSoundClass = MasterSoundClassPath.LoadSynchronous();
+    BGMSoundClass = BGMSoundClassPath.LoadSynchronous();
+    SFXSoundClass = SFXSoundClassPath.LoadSynchronous();
+    MasterSoundMix = MasterSoundMixPath.LoadSynchronous();
+    SoundDataTable = SoundDataTablePath.LoadSynchronous();
+
     // SoundMix를 한 번만 Push합니다.
     if (IsValid(MasterSoundMix))
     {
         UGameplayStatics::PushSoundMixModifier(this, MasterSoundMix);
         UE_LOG(ALogSoundSubsystem, Warning, TEXT("USoundSubsystem::Initialize : MasterSoundMix를 설정했습니다"));
     }
-    
+
     // 새 월드(레벨 재시작 포함)의 액터 초기화가 끝날 때마다 사운드 풀을 재생성하도록 바인딩합니다.
     WorldInitializedHandle = FWorldDelegates::OnWorldInitializedActors.AddUObject(this, &ThisClass::HandleWorldInitializedActors);
 }
@@ -96,17 +103,7 @@ void USoundSubsystem::Deinitialize()
 
 bool USoundSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
-    if (!Super::ShouldCreateSubsystem(Outer))
-    {
-        return false;
-    }
-
-    // 이 클래스를 상속한 클래스(BP_SoundSubsystem 등)가 존재하면
-    // 가장 하위 클래스만 인스턴스로 생성되도록 false를 반환합니다.
-    TArray<UClass*> DerivedClasses;
-    GetDerivedClasses(GetClass(), DerivedClasses, false);
-
-    return DerivedClasses.Num() == 0;
+    return Super::ShouldCreateSubsystem(Outer);
 }
 
 

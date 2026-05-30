@@ -10,8 +10,6 @@ void AMainGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	bEventStarted = false;
-
 	AMonitor* Monitor = nullptr;
 	AEntityClearLever* EntityClearLever = nullptr;
 
@@ -36,11 +34,10 @@ void AMainGameMode::BeginPlay()
 		CachedEventZones.Add(Zone);
 	}
 
-	// Monitor의 채널 전환 델리게이트에 EventManager와 GameMode를 바인딩합니다.
+	// Monitor의 채널 전환 델리게이트에 EventManager를 바인딩합니다.
 	if (Monitor && CachedEventManager)
 	{
 		Monitor->OnMonitorChangedDelegate.AddUObject(CachedEventManager, &AEventManager::OnMonitorChanged);
-		Monitor->OnMonitorChangedDelegate.AddUObject(this, &ThisClass::OnMonitorChanged);
 		LOG(TEXT("Monitor → EventManager 델리게이트 바인딩이 완료되었습니다."));
 	}
 
@@ -73,14 +70,5 @@ void AMainGameMode::StopEvent()
 	for (AEventZone* Zone : CachedEventZones)
 	{
 		Zone->StopEventCycle();
-	}
-}
-
-void AMainGameMode::OnMonitorChanged(ACCTV* InCCTV)
-{
-	if (!bEventStarted)
-	{
-		bEventStarted = true;
-		StartEvent();
 	}
 }

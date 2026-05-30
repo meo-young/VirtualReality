@@ -49,8 +49,8 @@ protected:
 private:
 	FTimerHandle ChannelSwitchTimerHandle;
 
-	/** 첫 트리거 여부를 표시합니다. true면 이미 Clock이 시작됨을 의미합니다. */
-	uint8 bIsClockStarted : 1 = false;
+	/** 첫 트리거 여부를 표시합니다. true면 이미 Clock과 이벤트 사이클이 시작됨을 의미합니다. */
+	uint8 bIsFirstTriggered : 1 = false;
 
 
 // Cached Section

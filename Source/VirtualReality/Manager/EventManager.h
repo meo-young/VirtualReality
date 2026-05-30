@@ -84,11 +84,11 @@ protected:
 
 	/** 다음 이벤트까지 대기 시간의 최솟값(초)입니다. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|이벤트")
-	float MinEventInterval = 30.0f;
+	float MinEventInterval = 15.0f;
 
 	/** 다음 이벤트까지 대기 시간의 최댓값(초)입니다. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|이벤트")
-	float MaxEventInterval = 50.0f;
+	float MaxEventInterval = 25.0f;
 
 	/** Entity 이벤트 발생까지 필요한 최소 이벤트 횟수입니다. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|이벤트")

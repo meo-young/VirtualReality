@@ -20,10 +20,6 @@ public:
 	void StopEvent();
 
 private:
-	void OnMonitorChanged(ACCTV* InCCTV);
-
-	uint8 bEventStarted : 1;
-
 	UPROPERTY()
 	TObjectPtr<AEventManager> CachedEventManager;
 

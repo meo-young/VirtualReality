@@ -56,7 +56,7 @@ struct FSoundPoolConfig
  * Sound Class / Sound Mix 에셋을 통해 볼륨을 제어하며,
  * 오브젝트 풀링을 활용하여 AudioComponent를 효율적으로 재사용합니다.
  */
-UCLASS(Blueprintable)
+UCLASS(Config = Game)
 class VIRTUALREALITY_API USoundSubsystem : public UGameInstanceSubsystem
 {
     GENERATED_BODY()
@@ -266,33 +266,53 @@ private:
 // Sound Class / Mix Variable
 // ─────────────────────────────────────────────────────────────
 private:
-    /** 마스터 Sound Class 에셋입니다. */
-    UPROPERTY(EditDefaultsOnly, Category = "변수")
+    /** 마스터 Sound Class 에셋 경로입니다. DefaultGame.ini에서 지정합니다. */
+    UPROPERTY(Config, EditDefaultsOnly, Category = "변수")
+    TSoftObjectPtr<USoundClass> MasterSoundClassPath;
+
+    /** BGM Sound Class 에셋 경로입니다. DefaultGame.ini에서 지정합니다. */
+    UPROPERTY(Config, EditDefaultsOnly, Category = "변수")
+    TSoftObjectPtr<USoundClass> BGMSoundClassPath;
+
+    /** SFX Sound Class 에셋 경로입니다. DefaultGame.ini에서 지정합니다. */
+    UPROPERTY(Config, EditDefaultsOnly, Category = "변수")
+    TSoftObjectPtr<USoundClass> SFXSoundClassPath;
+
+    /** 볼륨 조절에 사용할 Sound Mix 에셋 경로입니다. DefaultGame.ini에서 지정합니다. */
+    UPROPERTY(Config, EditDefaultsOnly, Category = "변수")
+    TSoftObjectPtr<USoundMix> MasterSoundMixPath;
+
+    /** 사운드 데이터 테이블 경로입니다. DefaultGame.ini에서 지정합니다. */
+    UPROPERTY(Config, EditDefaultsOnly, Category = "변수")
+    TSoftObjectPtr<UDataTable> SoundDataTablePath;
+
+    /** 런타임에 로드된 마스터 Sound Class입니다. */
+    UPROPERTY()
     TObjectPtr<USoundClass> MasterSoundClass;
 
-    /** BGM Sound Class 에셋입니다. */
-    UPROPERTY(EditDefaultsOnly, Category = "변수")
+    /** 런타임에 로드된 BGM Sound Class입니다. */
+    UPROPERTY()
     TObjectPtr<USoundClass> BGMSoundClass;
 
-    /** SFX Sound Class 에셋입니다. */
-    UPROPERTY(EditDefaultsOnly, Category = "변수")
+    /** 런타임에 로드된 SFX Sound Class입니다. */
+    UPROPERTY()
     TObjectPtr<USoundClass> SFXSoundClass;
 
-    /** 볼륨 조절에 사용할 Sound Mix 에셋입니다. */
-    UPROPERTY(EditDefaultsOnly, Category = "변수")
+    /** 런타임에 로드된 마스터 Sound Mix입니다. */
+    UPROPERTY()
     TObjectPtr<USoundMix> MasterSoundMix;
 
     /** 런타임에 로드된 사운드 데이터 테이블입니다. */
-    UPROPERTY(EditDefaultsOnly, Category = "변수")
+    UPROPERTY()
     TObjectPtr<UDataTable> SoundDataTable;
 
-    
+
 // ─────────────────────────────────────────────────────────────
 // ObjectPooling Variable
 // ─────────────────────────────────────────────────────────────
 private:
-    /** 풀 설정 구조체입니다. */
-    UPROPERTY(EditDefaultsOnly, Category = "변수")
+    /** 풀 설정 구조체입니다. DefaultGame.ini에서 값을 지정합니다. */
+    UPROPERTY(Config, EditDefaultsOnly, Category = "변수")
     FSoundPoolConfig PoolConfig;
     
     /** BGM용 AudioComponent 풀입니다. */

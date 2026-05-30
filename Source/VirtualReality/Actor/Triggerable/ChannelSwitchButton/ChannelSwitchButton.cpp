@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "GameMode/MainGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Subsystem/SoundSubsystem.h"
 
@@ -58,11 +59,18 @@ void AChannelSwitchButton::OnTriggered()
 	GetWorldTimerManager().SetTimer(ChannelSwitchTimerHandle, this, &ThisClass::SwitchChannel, 0.2f, false);
 	PlaySequence();
 
-	// 첫 트리거 시점에 Clock을 가동합니다.
-	if (!bIsClockStarted && Clock)
+	// 첫 트리거 시점에 Clock과 이벤트 사이클을 가동합니다.
+	if (bIsFirstTriggered) return;
+	bIsFirstTriggered = true;
+
+	if (Clock)
 	{
-		bIsClockStarted = true;
 		Clock->ActivateTimer();
+	}
+
+	if (AMainGameMode* GameMode = Cast<AMainGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->StartEvent();
 	}
 }
 

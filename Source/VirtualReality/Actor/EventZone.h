@@ -42,10 +42,10 @@ protected:
 	TObjectPtr<ALevelSequenceActor> EventSequence;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "변수|시퀀스")
-	float MinEventInterval = 60.0f;
+	float MinEventInterval = 30.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "변수|시퀀스")
-	float MaxEventInterval = 90.0f;
+	float MaxEventInterval = 45.0f;
 
 	/** 플레이어 시선이 이 각도 이내에 들어오면 이벤트를 시작하지 않습니다. */
 	UPROPERTY(EditDefaultsOnly, Category = "변수|시퀀스")
