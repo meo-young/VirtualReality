@@ -171,6 +171,9 @@ void AVRHand::Tick(float DeltaSeconds)
 
 void AVRHand::GrabObject()
 {
+	// 후레쉬가 고정된 손은 다른 물체를 잡지 않습니다. (입력은 후레쉬 토글 전용)
+	if (AttachedFlashlight) return;
+
 	// GrabCollision과 겹쳐있는 액터들 중 첫 번째 액터를 가져옵니다.
 	TArray<AActor*> OverlappedActors;
 	GrabCollision->GetOverlappingActors(OverlappedActors);
@@ -198,8 +201,11 @@ void AVRHand::GrabObject()
 
 void AVRHand::ReleaseObject()
 {
+	// 후레쉬가 고정된 손은 릴리즈하지 않습니다. (입력은 후레쉬 토글 전용, 잡기 상태 유지)
+	if (AttachedFlashlight) return;
+
 	bIsGrabbing = false;
-	
+
 	if (CachedGrabbable)
 	{
 		CachedGrabbable->OnRelease(HandMesh);
@@ -251,6 +257,13 @@ void AVRHand::StopHandGrasp()
 
 void AVRHand::DoInteract()
 {
+	// 손에 후레쉬가 고정되어 있으면 검지 트리거는 후레쉬 켜고/끄기만 처리합니다.
+	if (AttachedFlashlight)
+	{
+		AttachedFlashlight->Interact();
+		return;
+	}
+
 	if (CachedGrabbable)
 	{
 		CachedInteractable = TScriptInterface<IInteractable>(CurrentGrabbedActor);

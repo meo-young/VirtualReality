@@ -20,19 +20,19 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	
-// IGrabbable Interface	
+// IInteractable Interface
 public:
-	virtual void DoGrab(USkeletalMeshComponent* InComponent) override;
-	virtual void DoRelease(USkeletalMeshComponent* InComponent) override;
-	
-	
-// IInteractable Interface	
-public:	
 	virtual void Interact() override;
-	
+
+	/** 후레쉬 라이트를 강제로 켜거나 끕니다. (외부에서 호출) */
+	void SetLightEnabled(bool bEnabled);
+
 
 // Member Function
-private:	
+private:
+	/** 왼손을 찾아 후레쉬를 소켓에 영구 부착합니다. 손이 아직 없으면 잠시 후 재시도합니다. */
+	void TryAttachToHand();
+
 	void SetEnableLightVisibility(bool InEnableLightVisibility);
 	bool IsIrradiateEventZone();
 	
@@ -54,5 +54,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "변수|소켓")
 	FName LeftGrabSocketName = FName(TEXT("FlashSocket_L"));
 
+
+private:
+	/** 왼손 부착 재시도 타이머 핸들입니다. */
+	FTimerHandle AttachRetryTimerHandle;
 
 };

@@ -9,7 +9,7 @@ void AEventManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StartEventCycle();
+	// 이벤트 사이클은 플레이어가 모니터 채널을 처음 전환할 때 시작됩니다. (OnMonitorChanged)
 }
 
 void AEventManager::StartEventCycle()
@@ -161,17 +161,51 @@ void AEventManager::OnMonitorChanged(ACCTV* InWatchedCCTV)
 {
 	// 현재 감시 중인 CCTV를 캐싱합니다.
 	WatchedCCTV = InWatchedCCTV;
+
+	// 플레이어가 채널을 처음 전환했을 때 이벤트 사이클을 시작하고, 사망 제한 시간을 시작합니다.
+	if (!bEventCycleStarted)
+	{
+		bEventCycleStarted = true;
+		StartEventCycle();
+
+		// 모니터를 처음 전환한 후 MonitorDeathTimeout(초) 뒤에 플레이어를 사망 처리합니다.
+		GetWorldTimerManager().SetTimer(MonitorDeathTimerHandle, this, &ThisClass::PlayerDeath, MonitorDeathTimeout, false);
+	}
 }
 
 void AEventManager::PlayerDeath()
 {
 	StopEventCycle();
 	GetWorldTimerManager().ClearTimer(EntityEventDeathTimerHandle);
+	GetWorldTimerManager().ClearTimer(MonitorDeathTimerHandle);
+
+	// 현재 재생 중인 모든 이벤트 시퀀스를 중단합니다.
+	StopAllPlayingEvents();
 
 	if (AVRPlayer* Player = Cast<AVRPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
 	{
 		Player->OnDeath();
 	}
+}
+
+void AEventManager::StopAllPlayingEvents()
+{
+	for (auto& [CCTV, PlayedEvent] : PlayedEventsByZone)
+	{
+		if (!IsValid(PlayedEvent)) continue;
+
+		ULevelSequencePlayer* Player = PlayedEvent->GetSequencePlayer();
+		if (Player && Player->IsPlaying())
+		{
+			Player->Stop();
+		}
+	}
+
+	PlayedEventsByZone.Empty();
+	EntityEventActiveCCTV = nullptr;
+	UnscannedNormalEventCount = 0;
+
+	LOG(TEXT("재생 중인 모든 이벤트를 중단했습니다."));
 }
 
 ACCTV* AEventManager::PickEventZone()

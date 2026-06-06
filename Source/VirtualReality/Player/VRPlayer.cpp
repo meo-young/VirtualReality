@@ -84,6 +84,10 @@ void AVRPlayer::BeginPlay()
 
 void AVRPlayer::OnDeath()
 {
+	// 사망 처리는 최대 한 번만 실행합니다.
+	if (bIsDead) return;
+	bIsDead = true;
+
 	/*SetActorRotation(FRotator(0.0f, -90.0f, 0.0f));
 	bUseControllerRotationYaw = false;
 

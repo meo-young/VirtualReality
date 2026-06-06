@@ -74,8 +74,11 @@ protected:
 	TObjectPtr<UInputMappingContext> HandsMappingContext;
 	
 	
-// Cached Variable Section	
+// Cached Variable Section
 private:
+	/** 사망 처리가 이미 실행되었는지 여부입니다. OnDeath가 중복 호출되는 것을 방지합니다. */
+	uint8 bIsDead : 1 = false;
+
 	UPROPERTY()
 	TObjectPtr<AVRHand> LeftHand;
 	

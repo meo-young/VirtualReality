@@ -24,6 +24,9 @@ public:
 	void StopEventCycle();
 	void StopSequence();
 
+	/** Flash 감지 후 지연 시간이 지나면 후레쉬를 끄고 시퀀스를 정지합니다. */
+	void OnFlashStopElapsed();
+
 	/** Flash가 이 구역을 감지했을 때 호출됩니다. */
 	void OnFlashHit();
 
@@ -51,7 +54,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "변수|시퀀스")
 	float PlayerLookAtAngleThreshold = 45.0f;
 
-	/** 플레이어가 바라보는 상태에서 Flash 감지 시 Stop까지 대기 시간(초)입니다. */
+	/** 플레이어가 바라보는 상태에서 Flash 감지 시 Pause 후 후레쉬 OFF + Stop까지 대기 시간(초)입니다. */
 	UPROPERTY(EditDefaultsOnly, Category = "변수|시퀀스")
 	float FlashStopDelay = 2.0f;
 	

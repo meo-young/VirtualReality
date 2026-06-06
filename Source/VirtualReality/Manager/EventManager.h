@@ -75,6 +75,9 @@ private:
 	/** 플레이어 사망 처리를 수행합니다. */
 	void PlayerDeath();
 
+	/** 현재 재생 중인 모든 이벤트 시퀀스를 중단하고 관련 상태를 초기화합니다. */
+	void StopAllPlayingEvents();
+
 
 // Variable Section
 protected:
@@ -102,9 +105,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|사망")
 	float EntityEventDeathTimeout = 30.0f;
 
+	/** 모니터를 처음 전환한 후 플레이어가 사망하기까지의 제한 시간(초)입니다. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "변수|사망")
+	float MonitorDeathTimeout = 90.0f;
+
 private:
+	/** 첫 채널 전환으로 이벤트 사이클이 시작되었는지 여부입니다. */
+	uint8 bEventCycleStarted : 1 = false;
+
 	FTimerHandle EventTimerHandle;
 	FTimerHandle EntityEventDeathTimerHandle;
+	FTimerHandle MonitorDeathTimerHandle;
 
 	/** 스캔되지 않은 NormalEvent의 누적 개수입니다. */
 	int32 UnscannedNormalEventCount = 0;

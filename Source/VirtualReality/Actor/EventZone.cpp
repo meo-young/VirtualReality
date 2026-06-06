@@ -16,14 +16,6 @@ AEventZone::AEventZone()
 void AEventZone::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (EventSequence)
-	{
-		if (ULevelSequencePlayer* Player = EventSequence->GetSequencePlayer())
-		{
-			Player->OnFinished.AddDynamic(this, &ThisClass::OnSequenceEnded);
-		}
-	}
 }
 
 void AEventZone::StartEventCycle()
@@ -40,12 +32,24 @@ void AEventZone::StopSequence()
 {
 	if (EventSequence)
 	{
-		ULevelSequencePlayer* Player = EventSequence->GetSequencePlayer();
-		if (Player && Player->IsPlaying())
+		// Pause된 시퀀스는 IsPlaying()이 false이므로 가드 없이 Stop합니다.
+		if (ULevelSequencePlayer* Player = EventSequence->GetSequencePlayer())
 		{
 			Player->Stop();
 		}
 	}
+}
+
+void AEventZone::OnFlashStopElapsed()
+{
+	// 후레쉬를 끕니다.
+	if (AFlash* Flash = Cast<AFlash>(UGameplayStatics::GetActorOfClass(GetWorld(), AFlash::StaticClass())))
+	{
+		Flash->SetLightEnabled(false);
+	}
+
+	// Pause 상태인 이벤트 시퀀스를 정지합니다.
+	StopSequence();
 }
 
 void AEventZone::StartEvent()
@@ -100,7 +104,7 @@ void AEventZone::OnFlashHit()
 	if (!IsPlayerLookingAtZone()) return;
 
 	Player->Pause();
-	GetWorldTimerManager().SetTimer(FlashStopTimerHandle, this, &ThisClass::StopSequence, FlashStopDelay, false);
+	GetWorldTimerManager().SetTimer(FlashStopTimerHandle, this, &ThisClass::OnFlashStopElapsed, FlashStopDelay, false);
 }
 
 void AEventZone::OnSequenceEnded()

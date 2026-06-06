@@ -135,10 +135,13 @@ private:
 	
 	TScriptInterface<IGrabbable> CachedGrabbable;
 	TScriptInterface<IInteractable> CachedInteractable;
-	
+
+	/** 손에 영구 부착된 후레쉬입니다. 설정되면 검지 트리거가 이 후레쉬의 켜고/끄기만 처리합니다. */
+	TScriptInterface<IInteractable> AttachedFlashlight;
+
 	FVector LastLocation;
 	FVector CurrentCalculatedVelocity;
-	
+
 public:
 	FORCEINLINE FVector GetHandVelocity() const { return CurrentCalculatedVelocity; }
 	FORCEINLINE uint8 GetIsGrabbing() const { return bIsGrabbing; }
@@ -146,5 +149,16 @@ public:
 	FORCEINLINE FVector GetMotionControllerLocation() const { return MotionController->GetComponentLocation(); }
 	FORCEINLINE UVRHapticComponent* GetHapticComponent() const { return HapticComponent; }
 	FORCEINLINE EControllerHand GetHandType() const { return HandType; }
+	FORCEINLINE USkeletalMeshComponent* GetHandMesh() const { return HandMesh; }
+
+	/** 손에 영구 부착할 후레쉬를 등록하고, 해당 GrabbableType에 맞는 손 애니메이션을 적용합니다. */
+	FORCEINLINE void SetAttachedFlashlight(const TScriptInterface<IInteractable>& InFlashlight, EGrabbableType InGrabbableType)
+	{
+		AttachedFlashlight = InFlashlight;
+
+		// 그랩 과정을 거치지 않으므로, 애니메이션이 참조하는 상태를 직접 맞춰줍니다.
+		CurrentGrabbableType = InGrabbableType;
+		bIsGrabbing = true;
+	}
 	
 };
